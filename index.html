@@ -604,39 +604,36 @@ async function login(){
     // LOGIN ADMIN
     // ===============================
 
-    let {data:admin,error:errorAdmin}=await supabase
+// ===============================
+// LOGIN ADMIN
+// ===============================
 
+let { data: admin, error: errorAdmin } = await supabase
     .from("admins")
-
     .select("*")
-
-    .eq("email",email)
-
-    .eq("password",password)
-
+    .eq("email", email)
+    .eq("password", password)
     .maybeSingle();
 
-    if(admin){
+console.log("ADMIN :", admin);
+console.log("ERROR ADMIN :", errorAdmin);
 
-        currentUser=admin;
+if(admin){
 
-        currentUser.role="ADMIN";
+    currentUser = admin;
+    currentUser.role = "ADMIN";
 
-        document.getElementById("loginName").innerHTML=admin.nama;
+    document.getElementById("loginName").innerHTML = admin.nama;
 
-        document.getElementById("loginPage").style.display="none";
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("app").style.display = "block";
 
-        document.getElementById("app").style.display="block";
+    document.querySelector("nav").style.display = "flex";
 
-        document.querySelector("nav").style.display="flex";
+    showPage("dashboard");
 
-        showPage("dashboard");
-
-        return;
-
-    }
-
-    // ===============================
+    return;
+}    // ===============================
     // LOGIN PESERTA
     // ===============================
 
@@ -669,6 +666,9 @@ async function login(){
         return;
 
     }
+
+    console.log("PESERTA :", participant);
+console.log("ERROR PESERTA :", errorParticipant);
 
     alert("Email atau Password salah.");
 
@@ -968,10 +968,6 @@ style="width:100%;height:120px;">
 id="stepFile"
 type="file">
 
-<br><br>
-style="width:100%;height:120px;">
-
-</textarea>
 
 <br><br>
 
@@ -1268,6 +1264,11 @@ Batal
 
 }
 
+function closeModal(){
+
+    document.getElementById("modal").style.display="none";
+
+}
 async function saveEvent(){
 
 const {error}=await supabase
