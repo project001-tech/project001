@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Login Peserta</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const SUPABASE_URL="https://wxmxkgmgddmfysazcirl.supabase.co";
+
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4bXhrZ21nZGRtZnlzYXpjaXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MjkwMTEsImV4cCI6MjA5OTUwNTAxMX0.4xqkf2H0BGW8ds3SG2VS4mzSjJiL8ZOKJw1ztGD77LU";
+
+const db=window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+</script>
+
+<style>
+
+*{
+
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI;
+
+}
+
+body{
+
+background:#2563eb;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+height:100vh;
+
+}
+
+.card{
+
+width:420px;
+
+background:white;
+
+padding:30px;
+
+border-radius:12px;
+
+box-shadow:0 5px 20px rgba(0,0,0,.2);
+
+}
+
+h2{
+
+margin-bottom:20px;
+
+text-align:center;
+
+color:#2563eb;
+
+}
+
+label{
+
+display:block;
+
+margin-top:15px;
+
+margin-bottom:5px;
+
+font-weight:bold;
+
+}
+
+input{
+
+width:100%;
+
+padding:12px;
+
+border:1px solid #ccc;
+
+border-radius:8px;
+
+}
+
+button{
+
+margin-top:25px;
+
+width:100%;
+
+padding:12px;
+
+border:none;
+
+background:#2563eb;
+
+color:white;
+
+font-size:16px;
+
+border-radius:8px;
+
+cursor:pointer;
+
+}
+
+button:hover{
+
+background:#1d4ed8;
+
+}
+
+#error{
+
+margin-top:15px;
+
+text-align:center;
+
+color:red;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>
+
+LOGIN PESERTA
+
+</h2>
+
+<label>Email</label>
+
+<input
+type="email"
+id="email">
+
+<label>Password</label>
+
+<input
+type="password"
+id="password">
+
+<button onclick="login()">
+
+LOGIN
+
+</button>
+
+<div id="error"></div>
+
+</div>
+
+<script>
+
+/*==========================================
+LOGIN PESERTA
+==========================================*/
+
+async function login(){
+
+    const email = document.getElementById("email").value.trim();
+
+    const password = document.getElementById("password").value.trim();
+
+    document.getElementById("error").innerHTML="";
+
+    if(email=="" || password==""){
+
+        document.getElementById("error").innerHTML="Email dan Password wajib diisi";
+
+        return;
+
+    }
+
+    const {data,error}=await db
+
+    .from("participants")
+
+    .select("*")
+
+    .eq("email",email)
+
+    .eq("password",password)
+
+    .eq("status","Aktif")
+
+    .single();
+
+    if(error || !data){
+
+        document.getElementById("error").innerHTML="Email atau Password salah";
+
+        return;
+
+    }
+
+    /*=========================
+      SIMPAN SESSION
+    =========================*/
+
+    localStorage.setItem(
+
+        "rfs_user",
+
+        JSON.stringify(data)
+
+    );
+
+    /*=========================
+      CATAT ACTIVITY LOG
+    =========================*/
+
+    await db
+
+    .from("activity_log")
+
+    .insert({
+
+        user_id:data.id,
+
+        user_type:"PESERTA",
+
+        aktivitas:"LOGIN PESERTA",
+
+        participant_id:data.id,
+
+        created_at:new Date()
+
+    });
+
+    /*=========================
+      MASUK DASHBOARD PESERTA
+    =========================*/
+
+    location.href="peserta.html";
+
+}
+
+
+/*==========================================
+ENTER = LOGIN
+==========================================*/
+
+document.addEventListener("keypress",function(e){
+
+    if(e.key=="Enter"){
+
+        login();
+
+    }
+
+});
+
+</script>
+
+</body>
+
+</html>
