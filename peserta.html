@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard Peserta</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+ <input
+    type="file"
+    id="fileUpload"
+    style="display:none"
+    accept=".pdf,.doc,.docx,.xls,.xlsx,.zip"
+>
+
+<script>
+
+const SUPABASE_URL="ISI_URL_ANDA";
+
+const SUPABASE_ANON_KEY="ISI_ANON_KEY_ANDA";
+
+const db=window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI;
+}
+
+body{
+
+background:#f5f7fb;
+
+}
+
+header{
+
+height:65px;
+
+background:#2563eb;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:0 25px;
+
+color:white;
+
+}
+
+.container{
+
+max-width:1100px;
+
+margin:auto;
+
+padding:25px;
+
+}
+
+.card{
+
+background:white;
+
+border-radius:10px;
+
+padding:20px;
+
+margin-bottom:20px;
+
+box-shadow:0 3px 10px rgba(0,0,0,.08);
+
+}
+
+.card h3{
+
+margin-bottom:15px;
+
+}
+
+table{
+
+width:100%;
+
+border-collapse:collapse;
+
+}
+
+table th{
+
+background:#2563eb;
+
+color:white;
+
+padding:12px;
+
+}
+
+table td{
+
+padding:12px;
+
+border-bottom:1px solid #ddd;
+
+}
+
+.status{
+
+font-weight:bold;
+
+}
+
+.download{
+
+background:#10b981;
+
+color:white;
+
+padding:8px 15px;
+
+border:none;
+
+border-radius:6px;
+
+cursor:pointer;
+
+}
+
+.upload{
+
+background:#2563eb;
+
+color:white;
+
+padding:8px 15px;
+
+border:none;
+
+border-radius:6px;
+
+cursor:pointer;
+
+}
+
+.lock{
+
+color:red;
+
+font-weight:bold;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div>
+
+<h2>Recruitment Flow System</h2>
+
+</div>
+
+<div>
+
+<span id="namaPeserta">
+
+Memuat...
+
+</span>
+
+</div>
+
+</header>
+
+<div class="container">
+
+<div class="card">
+
+<h3>
+
+Informasi Peserta
+
+</h3>
+
+<table>
+
+<tr>
+
+<td width="180">
+
+Nama
+
+</td>
+
+<td id="infoNama">
+
+-
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+Email
+
+</td>
+
+<td id="infoEmail">
+
+-
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+Event
+
+</td>
+
+<td id="infoEvent">
+
+-
+
+</td>
+
+</tr>
+
+</table>
+
+</div>
+
+<div class="card">
+
+<h3>
+
+Tahapan Recruitment
+
+</h3>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th width="40">
+
+No
+
+</th>
+
+<th>
+
+Tahapan
+
+</th>
+
+<th width="160">
+
+Status
+
+</th>
+
+<th width="130">
+
+Download
+
+</th>
+
+<th width="130">
+
+Upload
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tblProgress">
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+let peserta = null;
+
+let progress = [];
+
+let eventData = null;
+
+
+/*==========================================
+CEK SESSION LOGIN
+==========================================*/
+
+document.addEventListener("DOMContentLoaded", async()=>{
+
+    const session = JSON.parse(
+        localStorage.getItem("rfs_user")
+    );
+
+    if(!session){
+
+        alert("Silahkan Login");
+
+        location.href="index.html";
+
+        return;
+
+    }
+
+    peserta=session;
+
+    await loadPeserta();
+
+});
+
+
+/*==========================================
+LOAD DATA PESERTA
+==========================================*/
+
+async function loadPeserta(){
+
+    const {data,error}=await db
+
+    .from("participants")
+
+    .select("*")
+
+    .eq("id",peserta.id)
+
+    .single();
+
+    if(error){
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    peserta=data;
+
+    document.getElementById("namaPeserta").innerHTML=data.nama;
+
+    document.getElementById("infoNama").innerHTML=data.nama;
+
+    document.getElementById("infoEmail").innerHTML=data.email;
+
+    await loadEvent();
+
+}
+
+
+/*==========================================
+LOAD EVENT
+==========================================*/
+
+async function loadEvent(){
+
+    const {data,error}=await db
+
+    .from("events")
+
+    .select("*")
+
+    .eq("id",peserta.event_id)
+
+    .single();
+
+    if(error){
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    eventData=data;
+
+    document.getElementById("infoEvent").innerHTML=data.nama_event;
+
+    await loadProgress();
+
+}
+
+  /*==========================================
+LOAD PROGRESS PESERTA
+==========================================*/
+
+async function loadProgress(){
+
+    const {data,error}=await db
+
+    .from("progress")
+
+    .select(`
+        *,
+        tests (
+            id,
+            nama_test,
+            urutan
+        )
+    `)
+
+    .eq("participant_id",peserta.id)
+
+    .eq("event_id",eventData.id)
+
+    .order("test_id");
+
+    if(error){
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    progress=data;
+
+    renderProgress();
+
+}
+
+
+/*==========================================
+TAMPILKAN PROGRESS
+==========================================*/
+
+function renderProgress(){
+
+    const tbody=document.getElementById("tblProgress");
+
+    tbody.innerHTML="";
+
+    progress.forEach((item,index)=>{
+
+        let tombolDownload="";
+        let tombolUpload="";
+
+       if(item.status=="TERKUNCI"){
+
+    tombolDownload="<span class='lock'>🔒</span>";
+
+    tombolUpload="<span class='lock'>🔒</span>";
+
+}
+
+tbody.innerHTML += `
+<tr>
+    <td>${index+1}</td>
+    <td>${item.tests.nama_test}</td>
+    <td>${item.status}</td>
+    <td>${tombolDownload}</td>
+    <td>${tombolUpload}</td>
+</tr>
+`;
+
+    });
+
+}
+
+else if(item.status=="SELESAI"){
+
+    tombolDownload="<span style='color:green;'>✔ Selesai</span>";
+
+    tombolUpload="<span style='color:green;'>✔ Upload</span>";
+
+}
+
+else{
+
+    tombolDownload=
+    `<button
+        class="download"
+        onclick="downloadSoal('${item.id}')">
+        Download
+    </button>`;
+
+    tombolUpload=
+    `<button
+        class="upload"
+        onclick="uploadJawaban('${item.id}')">
+        Upload
+    </button>`;
+
+}
+/*==========================================
+DOWNLOAD SOAL
+==========================================*/
+
+/*==========================================
+TAMPILKAN PROGRESS
+==========================================*/
+
+function renderProgress(){
+
+    const tbody = document.getElementById("tblProgress");
+
+    tbody.innerHTML = "";
+
+    progress.forEach((item,index)=>{
+
+        let tombolDownload = "";
+        let tombolUpload = "";
+
+        if(item.status=="TERKUNCI"){
+
+            tombolDownload="<span class='lock'>🔒</span>";
+            tombolUpload="<span class='lock'>🔒</span>";
+
+        }
+        else if(item.status=="SELESAI"){
+
+            tombolDownload="<span style='color:green'>✔ Selesai</span>";
+            tombolUpload="<span style='color:green'>✔ Upload</span>";
+
+        }
+        else{
+
+            tombolDownload=`
+                <button
+                    class="download"
+                    onclick="downloadSoal('${item.id}')">
+                    Download
+                </button>
+            `;
+
+            tombolUpload=`
+                <button
+                    class="upload"
+                    onclick="uploadJawaban('${item.id}')">
+                    Upload
+                </button>
+            `;
+
+        }
+
+        tbody.innerHTML += `
+        <tr>
+            <td>${index+1}</td>
+            <td>${item.tests.nama_test}</td>
+            <td class="status">${item.status}</td>
+            <td>${tombolDownload}</td>
+            <td>${tombolUpload}</td>
+        </tr>
+        `;
+
+    });
+
+}
+  /*==========================================
+UPLOAD JAWABAN
+==========================================*/
+
+let progressUpload = null;
+
+function uploadJawaban(progressId){
+
+    progressUpload = progressId;
+
+    document
+    .getElementById("fileUpload")
+    .click();
+
+}
+
+document
+.getElementById("fileUpload")
+.addEventListener("change",prosesUpload);
+
+async function prosesUpload(e){
+
+    const file = e.target.files[0];
+
+    if(!file){
+
+        return;
+
+    }
+
+    const row = progress.find(x=>x.id==progressUpload);
+
+    const ext = file.name.split(".").pop();
+
+    const fileName =
+
+        peserta.id +
+
+        "_" +
+
+        row.tests.nama_test +
+
+        "." +
+
+        ext;
+
+    const filePath =
+
+        "jawaban/" +
+
+        fileName;
+
+    const {error:uploadError} =
+
+        await db.storage
+
+        .from("recruitment-files")
+
+        .upload(
+
+            filePath,
+
+            file,
+
+            {
+
+                upsert:true
+
+            }
+
+        );
+
+    if(uploadError){
+
+        alert(uploadError.message);
+
+        return;
+
+    }
+
+    await simpanUpload(progressUpload,filePath);
+
+}
+
+  async function simpanUpload(id,filePath){
+
+    const row = progress.find(x=>x.id==id);
+
+    const {error}=await db
+
+    .from("progress")
+
+    .update({
+
+        status:"SELESAI",
+
+        upload_at:new Date(),
+
+        upload_count:(row.upload_count||0)+1,
+
+        file_jawaban:filePath
+
+    })
+
+    .eq("id",id);
+
+    if(error){
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    await bukaTahapanBerikutnya(row);
+
+    alert("Upload Berhasil");
+
+    loadProgress();
+
+}
+
+/*==========================================
+BUKA TAHAPAN BERIKUTNYA
+==========================================*/
+
+async function bukaTahapanBerikutnya(row){
+
+    const index = progress.findIndex(x=>x.id==row.id);
+
+    if(index==-1){
+
+        return;
+
+    }
+
+    if(index>=progress.length-1){
+
+        return;
+
+    }
+
+    const next = progress[index+1];
+
+    if(next.status!="TERKUNCI"){
+
+        return;
+
+    }
+
+    await db
+
+    .from("progress")
+
+    .update({
+
+        status:"BELUM"
+
+    })
+
+    .eq("id",next.id);
+
+}
+
+  </script>
+
+   </body>
+
+</html> 
