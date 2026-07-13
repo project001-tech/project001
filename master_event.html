@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Master Event</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://YOUR_PROJECT.supabase.co";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4bXhrZ21nZGRtZnlzYXpjaXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MjkwMTEsImV4cCI6MjA5OTUwNTAxMX0.4xqkf2H0BGW8ds3SG2VS4mzSjJiL8ZOKJw1ztGD77LU";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+</script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial}
+body{background:#f5f7fb}
+header{background:#2563eb;color:#fff;padding:16px 20px;font-size:20px;font-weight:bold}
+.container{padding:20px}
+.toolbar{display:flex;justify-content:space-between;margin-bottom:15px}
+input,textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px}
+button{padding:10px 15px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer}
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{border:1px solid #ddd;padding:10px}
+th{background:#eef3ff}
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);align-items:center;justify-content:center}
+.box{background:#fff;width:700px;padding:20px;border-radius:10px}
+.list{max-height:220px;overflow:auto;border:1px solid #ddd;padding:10px}
+.item{margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<header>Master Event</header>
+
+<div class="container">
+
+<div class="toolbar">
+<input id="txtCari" placeholder="Cari Event..." onkeyup="loadEvents()">
+<button onclick="baru()">+ Event</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Nama Event</th>
+<th>Periode</th>
+<th>Status</th>
+<th>Tahapan</th>
+<th>Aksi</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+</div>
+
+<div id="modal">
+<div class="box">
+
+<h3 id="judul">Tambah Event</h3>
+
+<input type="hidden" id="eid">
+
+<label>Nama Event</label>
+<input id="nama">
+
+<label>Periode</label>
+<input id="periode" placeholder="Contoh : Juli 2026">
+
+<label>Tahapan</label>
+<div id="daftarTahapan" class="list"></div>
+
+<br>
+
+<button onclick="simpan()">Simpan</button>
+<button onclick="tutup()">Batal</button>
+
+</div>
+</div>
+
+<script>
+let semuaTahapan=[];
+
+async function loadTahapan(){
+ const {data}=await db.from("tests").select("*").eq("aktif",true).order("urutan");
+ semuaTahapan=data||[];
+ renderTahapan([]);
+}
+
+function renderTahapan(selected){
+ daftarTahapan.innerHTML="";
+ semuaTahapan.forEach(t=>{
+   daftarTahapan.innerHTML+=`
+   <div class="item">
+   <label>
+   <input type="checkbox" value="${t.id}" ${selected.includes(String(t.id))?"checked":""}>
+   ${t.urutan}. ${t.nama_test}
+   </label>
+   </div>`;
+ });
+}
+
+async function loadEvents(){
+
+ const {data,error}=await db.from("events").select("*").order("created_at",{ascending:false});
+ if(error){alert(error.message);return;}
+
+ const cari=txtCari.value.toLowerCase();
+ tbody.innerHTML="";
+
+ (data||[])
+ .filter(e=>(e.nama_event||"").toLowerCase().includes(cari))
+ .forEach(e=>{
+
+ tbody.innerHTML+=`
+ <tr>
+ <td>${e.nama_event}</td>
+ <td>${e.periode||""}</td>
+ <td>${e.status||"Aktif"}</td>
+ <td>${(e.tahapan||[]).length}</td>
+ <td>
+ <button onclick="edit('${e.id}')">Edit</button>
+ </td>
+ </tr>`;
+
+ });
+
+}
+
+function baru(){
+ eid.value="";
+ nama.value="";
+ periode.value="";
+ renderTahapan([]);
+ modal.style.display="flex";
+}
+
+function tutup(){
+ modal.style.display="none";
+}
+
+async function edit(id){
+
+ const {data}=await db.from("events").select("*").eq("id",id).single();
+
+ eid.value=data.id;
+ nama.value=data.nama_event;
+ periode.value=data.periode||"";
+ renderTahapan((data.tahapan||[]).map(String));
+
+ modal.style.display="flex";
+
+}
+
+async function simpan(){
+
+ const tahapan=[...daftarTahapan.querySelectorAll("input:checked")].map(x=>x.value);
+
+ const obj={
+ nama_event:nama.value,
+ periode:periode.value,
+ status:"Aktif",
+ tahapan:tahapan
+ };
+
+ let res;
+
+ if(eid.value){
+   res=await db.from("events").update(obj).eq("id",eid.value);
+ }else{
+   res=await db.from("events").insert(obj);
+ }
+
+ if(res.error){alert(res.error.message);return;}
+
+ tutup();
+ loadEvents();
+
+}
+
+loadTahapan();
+loadEvents();
+</script>
+
+</body>
+</html>
