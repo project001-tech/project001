@@ -204,7 +204,17 @@ async function login(){
 
     .eq("password",password)
 
-    .eq("status","Aktif")
+    const {data,error}=await db
+
+.from("participants")
+
+.select("*")
+
+.eq("email",email)
+
+.eq("password",password)
+
+.single();
 
     .single();
 
