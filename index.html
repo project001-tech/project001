@@ -609,17 +609,22 @@ async function login(){
     // LOGIN ADMIN
     // ===============================
 
-// ===============================
-// LOGIN ADMIN
-// ===============================
-
 let { data: admin, error: errorAdmin } = await db
     .from("admins")
     .select("*")
-    .eq("email", email)
-    .eq("password", password)
     .maybeSingle();
 
+    
+console.log("EMAIL :", email);
+console.log("PASSWORD :", password);
+
+const { data: admin, error: errorAdmin } = await db
+    .from("admins")
+    .select("*");
+
+console.log(admin);
+console.log(errorAdmin);
+    
 console.log("ADMIN :", admin);
 console.log("ERROR ADMIN :", errorAdmin);
 
