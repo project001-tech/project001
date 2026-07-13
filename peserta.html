@@ -326,28 +326,17 @@ let eventData = null;
 CEK SESSION LOGIN
 ==========================================*/
 
-document.addEventListener("DOMContentLoaded", async()=>{
+document.addEventListener("DOMContentLoaded",async()=>{
 
-    const session = JSON.parse(
-        localStorage.getItem("rfs_user")
-    );
+    peserta={
 
-    if(!session){
+        id:"ISI_UUID_PESERTA"
 
-        alert("Silahkan Login");
-
-        location.href="index.html";
-
-        return;
-
-    }
-
-    peserta=session;
+    };
 
     await loadPeserta();
 
 });
-
 
 /*==========================================
 LOAD DATA PESERTA
@@ -748,8 +737,14 @@ async function bukaTahapanBerikutnya(row){
 
 }
 
-  </script>
+ <input
+type="file"
+id="fileUpload"
+style="display:none"
+accept=".pdf,.doc,.docx,.xls,.xlsx,.zip">
 
-   </body>
+</script>
 
-</html> 
+</body>
+
+</html>
