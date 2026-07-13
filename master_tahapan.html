@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Tahapan</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://YOUR_PROJECT.supabase.co";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4bXhrZ21nZGRtZnlzYXpjaXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MjkwMTEsImV4cCI6MjA5OTUwNTAxMX0.4xqkf2H0BGW8ds3SG2VS4mzSjJiL8ZOKJw1ztGD77LU";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+</script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial}
+body{background:#f5f7fb}
+header{background:#2563eb;color:#fff;padding:16px 20px;font-size:20px;font-weight:bold}
+.container{padding:20px}
+.toolbar{display:flex;justify-content:space-between;gap:10px;margin-bottom:15px}
+input,select,textarea{padding:10px;border:1px solid #ccc;border-radius:6px;width:100%}
+button{padding:10px 15px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer}
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{border:1px solid #ddd;padding:10px;text-align:left}
+th{background:#eef3ff}
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);align-items:center;justify-content:center}
+.box{width:550px;background:#fff;border-radius:10px;padding:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+</style>
+</head>
+<body>
+
+<header>Master Tahapan</header>
+
+<div class="container">
+
+<div class="toolbar">
+<input id="txtCari" placeholder="Cari Tahapan..." onkeyup="loadData()">
+<button onclick="tambah()">+ Tambah Tahapan</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Urut</th>
+<th>Nama</th>
+<th>Kategori</th>
+<th>Metode</th>
+<th>Durasi</th>
+<th>Status</th>
+<th>Aksi</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+</div>
+
+<div id="modal">
+<div class="box">
+
+<h3 id="judul">Tambah Tahapan</h3>
+
+<input type="hidden" id="id">
+
+<label>Nama Tahapan</label>
+<input id="nama">
+
+<div class="grid">
+<div>
+<label>Kategori</label>
+<select id="kategori">
+<option>Psikotes</option>
+<option>Kompetensi</option>
+<option>Interview</option>
+<option>Medical</option>
+</select>
+</div>
+
+<div>
+<label>Metode</label>
+<select id="metode">
+<option>DOWNLOAD_UPLOAD</option>
+<option>ONLINE</option>
+<option>CHECKLIST</option>
+</select>
+</div>
+</div>
+
+<div class="grid">
+<div>
+<label>Urutan</label>
+<input id="urutan" type="number" value="1">
+</div>
+
+<div>
+<label>Durasi (Menit)</label>
+<input id="durasi" type="number" value="60">
+</div>
+</div>
+
+<label>Unlock</label>
+<select id="unlock">
+<option>AUTO</option>
+<option>MANUAL</option>
+</select>
+
+<label>Petunjuk</label>
+<textarea id="petunjuk"></textarea>
+
+<label><input type="checkbox" id="aktif" checked> Aktif</label>
+
+<br><br>
+
+<button onclick="simpan()">Simpan</button>
+<button onclick="tutup()">Batal</button>
+
+</div>
+</div>
+
+<script>
+async function loadData(){
+
+const cari=document.getElementById("txtCari").value.toLowerCase();
+
+const {data,error}=await db.from("tests").select("*").order("urutan");
+
+if(error){alert(error.message);return;}
+
+tbody.innerHTML="";
+
+data.filter(x=>(x.nama_test||"").toLowerCase().includes(cari))
+.forEach(r=>{
+
+tbody.innerHTML+=`
+<tr>
+<td>${r.urutan||""}</td>
+<td>${r.nama_test||""}</td>
+<td>${r.kategori||""}</td>
+<td>${r.metode||""}</td>
+<td>${r.durasi_menit||"-"}</td>
+<td>${r.aktif?"Aktif":"Non Aktif"}</td>
+<td>
+<button onclick="edit('${r.id}')">Edit</button>
+<button onclick="statusTahapan('${r.id}',${r.aktif})">${r.aktif?"Non Aktif":"Aktifkan"}</button>
+</td>
+</tr>`;
+});
+
+}
+
+function tambah(){
+judul.innerHTML="Tambah Tahapan";
+modal.style.display="flex";
+id.value="";
+nama.value="";
+kategori.value="Psikotes";
+metode.value="DOWNLOAD_UPLOAD";
+urutan.value=1;
+durasi.value=60;
+unlock.value="AUTO";
+petunjuk.value="";
+aktif.checked=true;
+}
+
+function tutup(){modal.style.display="none";}
+
+async function edit(idx){
+
+const {data}=await db.from("tests").select("*").eq("id",idx).single();
+
+id.value=data.id;
+nama.value=data.nama_test;
+kategori.value=data.kategori;
+metode.value=data.metode;
+urutan.value=data.urutan;
+durasi.value=data.durasi_menit;
+unlock.value=data.unlock_mode;
+petunjuk.value=data.petunjuk;
+aktif.checked=data.aktif;
+
+judul.innerHTML="Edit Tahapan";
+modal.style.display="flex";
+}
+
+async function simpan(){
+
+const obj={
+nama_test:nama.value,
+kategori:kategori.value,
+metode:metode.value,
+urutan:Number(urutan.value),
+durasi_menit:Number(durasi.value),
+unlock_mode:unlock.value,
+petunjuk:petunjuk.value,
+aktif:aktif.checked
+};
+
+let res;
+
+if(id.value==""){
+res=await db.from("tests").insert(obj);
+}else{
+res=await db.from("tests").update(obj).eq("id",id.value);
+}
+
+if(res.error){alert(res.error.message);return;}
+
+tutup();
+loadData();
+}
+
+async function statusTahapan(idx,status){
+
+await db.from("tests")
+.update({aktif:!status})
+.eq("id",idx);
+
+loadData();
+
+}
+
+loadData();
+</script>
+
+</body>
+</html>
