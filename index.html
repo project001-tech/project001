@@ -12,15 +12,14 @@
 
 <script>
 
-const SUPABASE_URL = "https://wxmxkgmgddmfysazcirl.supabase.co";
+const SUPABASE_URL = "https://wxmxkgmgddmfysazcirl.db.co";
 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4bXhrZ21nZGRtZnlzYXpjaXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MjkwMTEsImV4cCI6MjA5OTUwNTAxMX0.4xqkf2H0BGW8ds3SG2VS4mzSjJiL8ZOKJw1ztGD77LU";
 
-const supabase = window.supabase.createClient(
+const db = window.db.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY
 );
-
 </script>
 
 <style>
@@ -1020,7 +1019,7 @@ if(file){
 
 filePath=Date.now()+"_"+file.name;
 
-const {error:uploadError}=await supabase.storage
+const {error:uploadError}=await db.storage
 
 .from("question-files")
 
