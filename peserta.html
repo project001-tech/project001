@@ -323,21 +323,32 @@ let eventData = null;
 
 
 /*==========================================
-CEK SESSION LOGIN
+AMBIL ID PESERTA DARI URL
 ==========================================*/
 
 document.addEventListener("DOMContentLoaded",async()=>{
 
+    const params=new URLSearchParams(window.location.search);
+
+    const id=params.get("id");
+
+    if(!id){
+
+        alert("Link tidak valid");
+
+        return;
+
+    }
+
     peserta={
 
-        id:"ISI_UUID_PESERTA"
+        id:id
 
     };
 
     await loadPeserta();
 
 });
-
 /*==========================================
 LOAD DATA PESERTA
 ==========================================*/
