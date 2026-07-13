@@ -8,17 +8,17 @@
 
 <title>Recruitment Flow System</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@db/db-js@2"></script>
 
 <script>
 
-const SUPABASE_URL = "https://wxmxkgmgddmfysazcirl.db.co";
+const db_URL = "https://wxmxkgmgddmfysazcirl.db.co";
 
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4bXhrZ21nZGRtZnlzYXpjaXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MjkwMTEsImV4cCI6MjA5OTUwNTAxMX0.4xqkf2H0BGW8ds3SG2VS4mzSjJiL8ZOKJw1ztGD77LU";
+const db_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4bXhrZ21nZGRtZnlzYXpjaXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MjkwMTEsImV4cCI6MjA5OTUwNTAxMX0.4xqkf2H0BGW8ds3SG2VS4mzSjJiL8ZOKJw1ztGD77LU";
 
 const db = window.db.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
+    db_URL,
+    db_ANON_KEY
 );
 </script>
 
@@ -607,7 +607,7 @@ async function login(){
 // LOGIN ADMIN
 // ===============================
 
-let { data: admin, error: errorAdmin } = await supabase
+let { data: admin, error: errorAdmin } = await db
     .from("admins")
     .select("*")
     .eq("email", email)
@@ -636,7 +636,7 @@ if(admin){
     // LOGIN PESERTA
     // ===============================
 
-    let {data:participant,error:errorParticipant}=await supabase
+    let {data:participant,error:errorParticipant}=await db
 
     .from("participants")
 
@@ -801,7 +801,7 @@ async function loadMasterStep(){
 
     document.getElementById("settingContent").innerHTML="Loading...";
 
-    const {data,error}=await supabase
+    const {data,error}=await db
 
     .from("tests")
 
@@ -1035,7 +1035,7 @@ return;
 
 }
 
-const {error}=await supabase
+const {error}=await db
 
 .from("tests")
 
@@ -1071,7 +1071,7 @@ loadMasterStep();
 
 async function updateStep(id){
 
-const {error}=await supabase
+const {error}=await db
 
 .from("tests")
 
@@ -1111,7 +1111,7 @@ return;
 
 }
 
-const {error}=await supabase
+const {error}=await db
 
 .from("tests")
 
@@ -1141,7 +1141,7 @@ async function loadEvents(){
 
     document.getElementById("settingContent").innerHTML="Loading...";
 
-    const {data,error}=await supabase
+    const {data,error}=await db
 
     .from("events")
 
@@ -1270,7 +1270,7 @@ function closeModal(){
 }
 async function saveEvent(){
 
-const {error}=await supabase
+const {error}=await db
 
 .from("events")
 
@@ -1302,7 +1302,7 @@ loadEvents();
 
 async function editEvent(id){
 
-const {data,error}=await supabase
+const {data,error}=await db
 
 .from("events")
 
@@ -1377,7 +1377,7 @@ Hapus
 
 async function updateEvent(id){
 
-const {error}=await supabase
+const {error}=await db
 
 .from("events")
 
@@ -1417,7 +1417,7 @@ return;
 
 }
 
-const {error}=await supabase
+const {error}=await db
 
 .from("events")
 
@@ -1442,7 +1442,7 @@ loadEvents();
 
 async function editStep(id){
 
-const {data,error}=await supabase
+const {data,error}=await db
 
 .from("tests")
 
