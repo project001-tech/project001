@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Master Peserta</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://YOUR_PROJECT.supabase.co";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4bXhrZ21nZGRtZnlzYXpjaXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MjkwMTEsImV4cCI6MjA5OTUwNTAxMX0.4xqkf2H0BGW8ds3SG2VS4mzSjJiL8ZOKJw1ztGD77LU";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+</script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial}
+body{background:#f5f7fb}
+header{background:#2563eb;color:#fff;padding:16px 20px;font-size:20px;font-weight:bold}
+.container{padding:20px}
+.toolbar{display:flex;justify-content:space-between;gap:10px;margin-bottom:15px}
+input,select{padding:10px;border:1px solid #ccc;border-radius:6px;width:100%}
+button{padding:10px 15px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer}
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{border:1px solid #ddd;padding:10px}
+th{background:#eef3ff}
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);align-items:center;justify-content:center}
+.box{background:#fff;width:520px;padding:20px;border-radius:10px}
+</style>
+</head>
+<body>
+
+<header>Master Peserta</header>
+
+<div class="container">
+
+<div class="toolbar">
+<input id="txtCari" placeholder="Cari Peserta..." onkeyup="loadPeserta()">
+<button onclick="baru()">+ Tambah Peserta</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Nama</th>
+<th>Email</th>
+<th>Event</th>
+<th>Status</th>
+<th>Aksi</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+</div>
+
+<div id="modal">
+<div class="box">
+
+<h3>Peserta</h3>
+
+<input type="hidden" id="pid">
+
+<label>Nama</label>
+<input id="nama">
+
+<label>Email</label>
+<input id="email">
+
+<label>Password</label>
+<input id="password" value="123456">
+
+<label>Event</label>
+<select id="event"></select>
+
+<label>Status</label>
+<select id="status">
+<option value="Aktif">Aktif</option>
+<option value="Non Aktif">Non Aktif</option>
+</select>
+
+<br><br>
+
+<button onclick="simpan()">Simpan</button>
+<button onclick="tutup()">Batal</button>
+
+</div>
+</div>
+
+<script>
+async function loadEvent(){
+ const {data}=await db.from("events").select("id,nama_event").order("nama_event");
+ event.innerHTML="";
+ (data||[]).forEach(e=>{
+   event.innerHTML+=`<option value="${e.id}">${e.nama_event}</option>`;
+ });
+}
+
+async function loadPeserta(){
+ const {data,error}=await db.from("participants").select("*").order("nama");
+ if(error){alert(error.message);return;}
+
+ const cari=txtCari.value.toLowerCase();
+ tbody.innerHTML="";
+
+ (data||[])
+ .filter(x=>(x.nama||"").toLowerCase().includes(cari))
+ .forEach(r=>{
+   tbody.innerHTML+=`
+   <tr>
+   <td>${r.nama||""}</td>
+   <td>${r.email||""}</td>
+   <td>${r.event_id||""}</td>
+   <td>${r.status||"Aktif"}</td>
+   <td><button onclick="edit('${r.id}')">Edit</button></td>
+   </tr>`;
+ });
+
+}
+
+function baru(){
+ pid.value="";
+ nama.value="";
+ email.value="";
+ password.value="123456";
+ status.value="Aktif";
+ modal.style.display="flex";
+}
+
+function tutup(){modal.style.display="none";}
+
+async function edit(id){
+ const {data}=await db.from("participants").select("*").eq("id",id).single();
+ pid.value=data.id;
+ nama.value=data.nama||"";
+ email.value=data.email||"";
+ password.value=data.password||"";
+ event.value=data.event_id||"";
+ status.value=data.status||"Aktif";
+ modal.style.display="flex";
+}
+
+async function simpan(){
+
+ const obj={
+  nama:nama.value,
+  email:email.value,
+  password:password.value,
+  event_id:event.value,
+  status:status.value
+ };
+
+ let res;
+
+ if(pid.value){
+   res=await db.from("participants").update(obj).eq("id",pid.value);
+ }else{
+   res=await db.from("participants").insert(obj);
+ }
+
+ if(res.error){
+   alert(res.error.message);
+   return;
+ }
+
+ tutup();
+ loadPeserta();
+
+}
+
+loadEvent();
+loadPeserta();
+</script>
+
+</body>
+</html>
