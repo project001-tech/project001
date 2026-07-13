@@ -518,9 +518,9 @@ SETTING
             Master Tahapan
         </button>
 
-        <button>
-            Event
-        </button>
+        <button onclick="loadEvents()">
+    Master Event
+</button>
 
         <button>
             Peserta
@@ -1123,6 +1123,309 @@ closeModal();
 loadMasterStep();
 
 }
+
+/*==================================================
+MASTER EVENT
+==================================================*/
+
+async function loadEvents(){
+
+    document.getElementById("settingContent").innerHTML="Loading...";
+
+    const {data,error}=await supabase
+
+    .from("events")
+
+    .select("*")
+
+    .order("created_at",{ascending:false});
+
+    if(error){
+
+        document.getElementById("settingContent").innerHTML=error.message;
+
+        return;
+
+    }
+
+    let html=`
+
+    <button onclick="addEvent()">
+
+        + Tambah Event
+
+    </button>
+
+    <br><br>
+
+    <table>
+
+    <tr>
+
+        <th>Nama Event</th>
+
+        <th>Status</th>
+
+        <th>Aksi</th>
+
+    </tr>
+
+    `;
+
+    data.forEach(row=>{
+
+        html+=`
+
+        <tr>
+
+            <td>${row.nama_event}</td>
+
+            <td>${row.status}</td>
+
+            <td>
+
+                <button onclick="editEvent('${row.id}')">
+
+                    Edit
+
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+    html+=`</table>`;
+
+    document.getElementById("settingContent").innerHTML=html;
+
+}
+
+function addEvent(){
+
+showModal(`
+
+<h2>Tambah Event</h2>
+
+<br>
+
+<label>Nama Event</label>
+
+<input
+id="eventNama"
+style="width:100%;padding:10px;">
+
+<br><br>
+
+<label>Tanggal Mulai</label>
+
+<input
+type="date"
+id="eventMulai"
+style="width:100%;padding:10px;">
+
+<br><br>
+
+<label>Tanggal Selesai</label>
+
+<input
+type="date"
+id="eventSelesai"
+style="width:100%;padding:10px;">
+
+<br><br>
+
+<button onclick="saveEvent()">
+
+Simpan
+
+</button>
+
+<button onclick="closeModal()">
+
+Batal
+
+</button>
+
+`);
+
+}
+
+async function saveEvent(){
+
+const {error}=await supabase
+
+.from("events")
+
+.insert({
+
+nama_event:document.getElementById("eventNama").value,
+
+tanggal_mulai:document.getElementById("eventMulai").value,
+
+tanggal_selesai:document.getElementById("eventSelesai").value,
+
+status:"AKTIF"
+
+});
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+closeModal();
+
+loadEvents();
+
+}
+
+async function editEvent(id){
+
+const {data,error}=await supabase
+
+.from("events")
+
+.select("*")
+
+.eq("id",id)
+
+.single();
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+showModal(`
+
+<h2>Edit Event</h2>
+
+<br>
+
+<input
+id="editEventNama"
+value="${data.nama_event}"
+style="width:100%;padding:10px;">
+
+<br><br>
+
+<input
+type="date"
+id="editMulai"
+value="${data.tanggal_mulai}"
+style="width:100%;padding:10px;">
+
+<br><br>
+
+<input
+type="date"
+id="editSelesai"
+value="${data.tanggal_selesai}"
+style="width:100%;padding:10px;">
+
+<br><br>
+
+<select id="editStatus">
+
+<option ${data.status=="AKTIF"?"selected":""}>AKTIF</option>
+
+<option ${data.status=="SELESAI"?"selected":""}>SELESAI</option>
+
+</select>
+
+<br><br>
+
+<button onclick="updateEvent('${id}')">
+
+Update
+
+</button>
+
+<button onclick="deleteEvent('${id}')">
+
+Hapus
+
+</button>
+
+`);
+
+}
+
+async function updateEvent(id){
+
+const {error}=await supabase
+
+.from("events")
+
+.update({
+
+nama_event:document.getElementById("editEventNama").value,
+
+tanggal_mulai:document.getElementById("editMulai").value,
+
+tanggal_selesai:document.getElementById("editSelesai").value,
+
+status:document.getElementById("editStatus").value
+
+})
+
+.eq("id",id);
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+closeModal();
+
+loadEvents();
+
+}
+
+async function deleteEvent(id){
+
+if(confirm("Hapus Event?")==false){
+
+return;
+
+}
+
+const {error}=await supabase
+
+.from("events")
+
+.delete()
+
+.eq("id",id);
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+closeModal();
+
+loadEvents();
+
+}
+
+
 async function editStep(id){
 
 const {data,error}=await supabase
