@@ -27,9 +27,70 @@ th{background:#eef3ff}
 .box{background:#fff;width:700px;padding:20px;border-radius:10px}
 .list{max-height:220px;overflow:auto;border:1px solid #ddd;padding:10px}
 .item{margin-bottom:8px}
+
+ .topbar{
+
+    height:65px;
+
+    background:#2563eb;
+
+    color:white;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:0 20px;
+
+}
+
+.backBtn{
+
+    background:white;
+
+    color:#2563eb;
+
+    border:none;
+
+    padding:8px 16px;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+}
+
+.backBtn:hover{
+
+    background:#e5e7eb;
+
+}
 </style>
 </head>
 <body>
+
+ <header class="topbar">
+
+    <button class="backBtn"
+        onclick="location.href='dashboard.html'">
+
+        ← Dashboard
+
+    </button>
+
+    <h2>Master Tahapan</h2>
+
+    <div id="namaAdmin">
+
+        Administrator
+
+    </div>
+
+</header>
 
 <header>Master Event</header>
 
