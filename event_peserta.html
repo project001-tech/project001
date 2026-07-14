@@ -410,8 +410,6 @@ Menunggu proses...
 
 <script>
 
-<script>
-
 let semuaPeserta=[];
 let semuaEvent=[];
 let semuaTahapan=[];
@@ -526,7 +524,9 @@ function renderPeserta(){
 
             value="${p.id}"
 
-            ${p.event_id ? "checked":""}
+            ${p.event_id==document.getElementById("eventSelect").value
+? "checked"
+: ""}
 
             >
 
@@ -644,8 +644,6 @@ async function pilihEvent(){
 SIMPAN PESERTA KE EVENT
 ==================================== -->
 
-<script>
-
 async function simpanPeserta(){
 
     const eventId=document.getElementById("eventSelect").value;
@@ -752,13 +750,13 @@ async function simpanPeserta(){
 
             .eq("test_id",t.test_id);
 
-            if(cek.data.length>0){
+           if((cek.data || []).length>0){
 
-                skip++;
+    skip++;
 
-                continue;
+    continue;
 
-            }
+}
 
             const simpan=await db
 
@@ -807,10 +805,6 @@ async function simpanPeserta(){
     alert("Generate Progress selesai.");
 
 }
-
-</script>
-
-</script>
 
 </script>
 
