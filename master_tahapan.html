@@ -39,6 +39,53 @@ th{background:#eef3ff}
 <button onclick="tambah()">+ Tambah Tahapan</button>
 </div>
 
+<div
+style="display:flex;gap:20px;margin-bottom:20px;">
+
+<div class="card">
+
+<b id="jmlTahapan">
+
+0
+
+</b>
+
+<br>
+
+Total Tahapan
+
+</div>
+
+<div class="card">
+
+<b id="aktifTahapan">
+
+0
+
+</b>
+
+<br>
+
+Aktif
+
+</div>
+
+<div class="card">
+
+<b id="nonAktifTahapan">
+
+0
+
+</b>
+
+<br>
+
+Non Aktif
+
+</div>
+
+</div>    
+    
 <table>
 <thead>
 <tr>
@@ -46,6 +93,7 @@ th{background:#eef3ff}
 <th>Nama</th>
 <th>Kategori</th>
 <th>Metode</th>
+<th>Durasi</th>
 <th>Durasi</th>
 <th>Status</th>
 <th>Aksi</th>
@@ -132,14 +180,38 @@ tbody.innerHTML="";
 data.filter(x=>(x.nama_test||"").toLowerCase().includes(cari))
 .forEach(r=>{
 
+document.getElementById("jmlTahapan").innerHTML=data.length;
+
+document.getElementById("aktifTahapan").innerHTML=
+
+data.filter(x=>x.aktif).length;
+
+document.getElementById("nonAktifTahapan").innerHTML=
+
+data.filter(x=>!x.aktif).length;    
+
 tbody.innerHTML+=`
 <tr>
 <td>${r.urutan||""}</td>
 <td>${r.nama_test||""}</td>
-<td>${r.kategori||""}</td>
+<td>
+
+${badgeKategori(r.kategori)}
+
+</td>
 <td>${r.metode||""}</td>
-<td>${r.durasi_menit||"-"}</td>
-<td>${r.aktif?"Aktif":"Non Aktif"}</td>
+<td>${r.durasi_menit||"-"}</td>    
+<td>${r.durasi_menit} Menit</td>
+
+<td>
+
+${r.aktif
+
+? "<span style='color:green;font-weight:bold'>Aktif</span>"
+
+: "<span style='color:red;font-weight:bold'>Non Aktif</span>"}
+
+</td>
 <td>
 
 <button onclick="edit('${r.id}')">
@@ -180,6 +252,36 @@ aktif.checked=true;
 
 function tutup(){modal.style.display="none";}
 
+function badgeKategori(kategori){
+
+    if(kategori=="Psikotes"){
+
+        return "<span style='background:#2563eb;color:white;padding:4px 10px;border-radius:20px;'>Psikotes</span>";
+
+    }
+
+    if(kategori=="Kompetensi"){
+
+        return "<span style='background:#10b981;color:white;padding:4px 10px;border-radius:20px;'>Kompetensi</span>";
+
+    }
+
+    if(kategori=="Interview"){
+
+        return "<span style='background:#f59e0b;color:white;padding:4px 10px;border-radius:20px;'>Interview</span>";
+
+    }
+
+    if(kategori=="Medical"){
+
+        return "<span style='background:#ef4444;color:white;padding:4px 10px;border-radius:20px;'>Medical</span>";
+
+    }
+
+    return kategori;
+
+}    
+    
 async function edit(idx){
 
 const {data}=await db.from("tests").select("*").eq("id",idx).single();
