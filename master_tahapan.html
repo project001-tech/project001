@@ -154,6 +154,8 @@ Non Aktif
 
 <label>Petunjuk</label>
 <textarea id="petunjuk"></textarea>
+<label>Link / Nama File Soal</label>
+<input id="fileSoal" placeholder="misal : DISC.pdf">
 
 <label><input type="checkbox" id="aktif" checked> Aktif</label>
 
@@ -219,23 +221,23 @@ async function loadData(){
 
             </td>
 
-            <td>
+           <td>
 
-                <button onclick="edit('${r.id}')">
-                    ✏️
-                </button>
+<button onclick="edit('${r.id}')">
+✏ Edit
+</button>
 
-                <button onclick="statusTahapan('${r.id}',${r.aktif})">
-                    ${r.aktif?"OFF":"ON"}
-                </button>
+<button onclick="statusTahapan('${r.id}',${r.aktif})">
+${r.aktif?"Non Aktif":"Aktifkan"}
+</button>
 
-                <button
-                    style="background:#dc2626"
-                    onclick="hapusTahapan('${r.id}')">
-                    🗑
-                </button>
+<button
+style="background:#dc2626"
+onclick="hapusTahapan('${r.id}')">
+🗑 Hapus
+</button>
 
-            </td>
+</td>
 
         </tr>
 
@@ -317,6 +319,7 @@ urutan.value=data.urutan;
 durasi.value=data.durasi_menit;
 unlock.value=data.unlock_mode;
 petunjuk.value=data.petunjuk;
+fileSoal.value=data.file_soal||"";
 aktif.checked=data.aktif;
 
 judul.innerHTML="Edit Tahapan";
@@ -336,16 +339,41 @@ if(nama.value.trim()==""){
 
 }    
 const obj={
-nama_test:nama.value,
-kategori:kategori.value,
-metode:metode.value,
-urutan:Number(urutan.value),
-durasi_menit:Number(durasi.value),
-unlock_mode:unlock.value,
-petunjuk:petunjuk.value,
-aktif:aktif.checked
+
+    nama_test:nama.value.trim(),
+
+    kategori:kategori.value,
+
+    metode:metode.value,
+
+    urutan:Number(urutan.value),
+
+    durasi_menit:Number(durasi.value),
+
+    unlock_mode:unlock.value,
+
+    petunjuk:petunjuk.value,
+
+    file_soal:fileSoal.value,
+
+    jenis:metode.value,
+
+    aktif:aktif.checked
+
 };
 
+const cek = await db
+.from("tests")
+.select("id")
+.eq("nama_test",nama.value.trim());
+
+if(cek.data && cek.data.length>0 && id.value==""){
+
+    alert("Nama test sudah ada.");
+
+    return;
+
+}
 let res;
 
 if(id.value==""){
