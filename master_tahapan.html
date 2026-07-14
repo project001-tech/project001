@@ -30,7 +30,9 @@ th{background:#eef3ff}
 </head>
 <body>
 
-<header>Master Tahapan</header>
+<header style="background:red">
+MASTER TAHAPAN V3
+</header>
 
 <div class="container">
 
@@ -253,14 +255,15 @@ document.getElementById("judul").innerHTML="Tambah Tahapan";
 document.getElementById("modal").style.display="flex";
 
 document.getElementById("id").value="";
-nama.value="";
-kategori.value="Psikotes";
-metode.value="DOWNLOAD_UPLOAD";
-urutan.value=1;
-durasi.value=60;
-unlock.value="AUTO";
-petunjuk.value="";
-aktif.checked=true;
+document.getElementById("nama").value="";
+document.getElementById("kategori").value="Psikotes";
+document.getElementById("metode").value="DOWNLOAD_UPLOAD";
+document.getElementById("urutan").value=1;
+document.getElementById("durasi").value=60;
+document.getElementById("unlock").value="AUTO";
+document.getElementById("petunjuk").value="";
+document.getElementById("fileSoal").value="";
+document.getElementById("aktif").checked=true;
 }
 
 function tutup(){modal.style.display="none";}
