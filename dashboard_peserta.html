@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard Peserta</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const SUPABASE_URL="https://wxmxkgmgddmfysazcirl.supabase.co";
+
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4bXhrZ21nZGRtZnlzYXpjaXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MjkwMTEsImV4cCI6MjA5OTUwNTAxMX0.4xqkf2H0BGW8ds3SG2VS4mzSjJiL8ZOKJw1ztGD77LU";
+
+const db=window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+</script>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,Arial;
+}
+
+body{
+
+background:#f5f7fb;
+
+}
+
+header{
+
+height:65px;
+
+background:#2563eb;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:0 25px;
+
+color:white;
+
+box-shadow:0 2px 10px rgba(0,0,0,.15);
+
+}
+
+header h2{
+
+font-size:26px;
+
+}
+
+.headerRight{
+
+display:flex;
+
+align-items:center;
+
+gap:15px;
+
+}
+
+.logout{
+
+background:#ef4444;
+
+color:white;
+
+border:none;
+
+padding:8px 16px;
+
+border-radius:6px;
+
+cursor:pointer;
+
+font-weight:bold;
+
+}
+
+.logout:hover{
+
+background:#dc2626;
+
+}
+
+.container{
+
+max-width:1200px;
+
+margin:auto;
+
+padding:25px;
+
+}
+
+.card{
+
+background:white;
+
+padding:20px;
+
+border-radius:12px;
+
+box-shadow:0 5px 18px rgba(0,0,0,.08);
+
+margin-bottom:20px;
+
+}
+
+.card h3{
+
+margin-bottom:10px;
+
+color:#1e3a8a;
+
+}
+
+.infoGrid{
+
+display:grid;
+
+grid-template-columns:repeat(4,1fr);
+
+gap:15px;
+
+margin-top:20px;
+
+}
+
+.infoBox{
+
+background:#eef4ff;
+
+padding:15px;
+
+border-radius:10px;
+
+}
+
+.infoTitle{
+
+font-size:13px;
+
+color:#666;
+
+margin-bottom:5px;
+
+}
+
+.infoValue{
+
+font-size:18px;
+
+font-weight:bold;
+
+color:#1e3a8a;
+
+}
+
+table{
+
+width:100%;
+
+border-collapse:collapse;
+
+margin-top:20px;
+
+background:white;
+
+}
+
+th{
+
+background:#2563eb;
+
+color:white;
+
+padding:12px;
+
+}
+
+td{
+
+padding:12px;
+
+border-bottom:1px solid #e5e7eb;
+
+}
+
+.statusBelum{
+
+color:#dc2626;
+
+font-weight:bold;
+
+}
+
+.statusDownload{
+
+color:#2563eb;
+
+font-weight:bold;
+
+}
+
+.statusUpload{
+
+color:#16a34a;
+
+font-weight:bold;
+
+}
+
+.btn{
+
+padding:8px 14px;
+
+border:none;
+
+border-radius:6px;
+
+cursor:pointer;
+
+font-weight:bold;
+
+}
+
+.btnDownload{
+
+background:#2563eb;
+
+color:white;
+
+}
+
+.btnUpload{
+
+background:#10b981;
+
+color:white;
+
+}
+
+.btnDisable{
+
+background:#cbd5e1;
+
+color:#666;
+
+cursor:not-allowed;
+
+}
+
+.footer{
+
+margin-top:40px;
+
+text-align:center;
+
+font-size:13px;
+
+color:#777;
+
+}
+
+@media(max-width:900px){
+
+.infoGrid{
+
+grid-template-columns:1fr;
+
+}
+
+table{
+
+font-size:13px;
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h2>
+
+Recruitment Flow System
+
+</h2>
+
+<div class="headerRight">
+
+<div id="namaPeserta">
+
+Memuat...
+
+</div>
+
+<button
+class="logout"
+onclick="logout()">
+
+Logout
+
+</button>
+
+</div>
+
+</header>
+
+<div class="container">
+
+<div class="card">
+
+<h3>
+
+Dashboard Peserta
+
+</h3>
+
+<div class="infoGrid">
+
+<div class="infoBox">
+
+<div class="infoTitle">
+
+Nama
+
+</div>
+
+<div
+class="infoValue"
+id="infoNama">
+
+-
+
+</div>
+
+</div>
+
+<div class="infoBox">
+
+<div class="infoTitle">
+
+Event
+
+</div>
+
+<div
+class="infoValue"
+id="infoEvent">
+
+-
+
+</div>
+
+</div>
+
+<div class="infoBox">
+
+<div class="infoTitle">
+
+Total Tahapan
+
+</div>
+
+<div
+class="infoValue"
+id="infoTotal">
+
+0
+
+</div>
+
+</div>
+
+<div class="infoBox">
+
+<div class="infoTitle">
+
+Progress
+
+</div>
+
+<div
+class="infoValue"
+id="infoProgress">
+
+0%
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>
+
+Tahapan Recruitment
+
+</h3>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th width="60">
+
+No
+
+</th>
+
+<th>
+
+Tahapan
+
+</th>
+
+<th width="180">
+
+Status
+
+</th>
+
+<th width="160">
+
+Download
+
+</th>
+
+<th width="160">
+
+Upload
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tbody">
+
+<tr>
+
+<td colspan="5" align="center">
+
+Memuat Data...
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="footer">
+
+Recruitment Flow System © 2026
+
+</div>
+
+</div>
+
+<script>
+
+/*====================================
+
+SESSION
+
+====================================*/
+
+let peserta=null;
+
+let eventId=null;
+
+let progressData=[];
+
+let tahapanData=[];
+
+/*====================================
+
+CEK LOGIN
+
+====================================*/
+
+function cekLogin(){
+
+const s=localStorage.getItem("rfs_user");
+
+if(!s){
+
+location.href="login_peserta.html";
+
+return;
+
+}
+
+peserta=JSON.parse(s);
+
+document.getElementById("namaPeserta").innerHTML=peserta.nama;
+
+document.getElementById("infoNama").innerHTML=peserta.nama;
+
+eventId=peserta.event_id;
+
+}
+
+/*====================================
+
+LOGOUT
+
+====================================*/
+
+function logout(){
+
+localStorage.removeItem("rfs_user");
+
+location.href="login_peserta.html";
+
+}
+
+/*====================================
+
+LOAD EVENT
+
+====================================*/
+
+async function loadEvent(){
+
+const {data,error}=await db
+
+.from("events")
+
+.select("*")
+
+.eq("id",eventId)
+
+.single();
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+document.getElementById("infoEvent").innerHTML=
+
+data.nama_event;
+
+loadTahapan();
+
+}
+
+/*====================================
+
+LOAD TAHAPAN EVENT
+
+====================================*/
+
+async function loadTahapan(){
+
+const {data,error}=await db
+
+.from("event_tests")
+
+.select(`
+*,
+tests(
+id,
+nama_test
+)
+`)
+
+.eq("event_id",eventId)
+
+.order("urutan");
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+tahapanData=data||[];
+
+loadProgress();
+
+}
+
+/*====================================
+
+LOAD PROGRESS
+
+====================================*/
+
+async function loadProgress(){
+
+const {data,error}=await db
+
+.from("progress")
+
+.select("*")
+
+.eq("participant_id",peserta.id)
+
+.eq("event_id",eventId);
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+progressData=data||[];
+
+renderTahapan();
+
+}
+
+/*====================================
+
+RENDER TABEL
+
+====================================*/
+
+function renderTahapan(){
+
+const tbody=document.getElementById("tbody");
+
+tbody.innerHTML="";
+
+let selesai=0;
+
+tahapanData.forEach((row,index)=>{
+
+const p=progressData.find(x=>x.test_id==row.test_id);
+
+let status="BELUM";
+
+let warna="statusBelum";
+
+let tombolDownload=
+"<button class='btn btnDownload'>Download</button>";
+
+let tombolUpload=
+"<button class='btn btnDisable'>Upload</button>";
+
+if(p){
+
+status=p.status||"BELUM";
+
+if(status=="DOWNLOADED"){
+
+warna="statusDownload";
+
+tombolDownload=
+
+`<button
+class="btn btnDownload"
+onclick="downloadSoal('${row.id}')">
+
+Download Lagi
+
+</button>`;
+
+tombolUpload=
+
+`<button
+class="btn btnUpload"
+onclick="uploadJawaban('${row.id}')">
+
+Upload
+
+</button>`;
+
+}
+
+if(status=="UPLOADED"){
+
+warna="statusUpload";
+
+tombolDownload=
+
+`<button
+class="btn btnDownload"
+onclick="downloadSoal('${row.id}')">
+
+Download
+
+</button>`;
+
+tombolUpload=
+
+`<button
+class="btn btnUpload"
+onclick="uploadJawaban('${row.id}')">
+
+Upload Lagi
+
+</button>`;
+
+selesai++;
+
+}
+
+}else{
+
+tombolDownload=
+
+`<button
+class="btn btnDownload"
+onclick="downloadSoal('${row.id}')">
+
+Download
+
+</button>`;
+
+}
+
+tbody.innerHTML+=`
+
+<tr>
+
+<td>
+
+${index+1}
+
+</td>
+
+<td>
+
+${row.tests.nama_test}
+
+</td>
+
+<td>
+
+<span class="${warna}">
+
+${status}
+
+</span>
+
+</td>
+
+<td>
+
+${tombolDownload}
+
+</td>
+
+<td>
+
+${tombolUpload}
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+document.getElementById("infoTotal").innerHTML=
+
+tahapanData.length;
+
+let persen=0;
+
+if(tahapanData.length>0){
+
+persen=Math.round(
+
+(selesai/tahapanData.length)*100
+
+);
+
+}
+
+document.getElementById("infoProgress").innerHTML=
+
+persen+"%";
+
+}
+
+/*====================================
+
+DOWNLOAD
+
+sementara
+
+====================================*/
+
+function downloadSoal(id){
+
+alert("Download soal : "+id);
+
+}
+
+/*====================================
+
+UPLOAD
+
+sementara
+
+====================================*/
+
+function uploadJawaban(id){
+
+alert("Upload jawaban : "+id);
+
+}
+
+/*====================================
+
+START
+
+====================================*/
+
+cekLogin();
+
+loadEvent();
+
+
+</script>
+
+</body>
+</html>
