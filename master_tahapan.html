@@ -7,7 +7,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL="https://YOUR_PROJECT.supabase.co";
+const SUPABASE_URL="https://wxmxkgmgddmfysazcirl.supabase.co";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4bXhrZ21nZGRtZnlzYXpjaXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MjkwMTEsImV4cCI6MjA5OTUwNTAxMX0.4xqkf2H0BGW8ds3SG2VS4mzSjJiL8ZOKJw1ztGD77LU";
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 </script>
@@ -246,9 +246,11 @@ async function loadData(){
 }
 
 function tambah(){
-judul.innerHTML="Tambah Tahapan";
-modal.style.display="flex";
-id.value="";
+document.getElementById("judul").innerHTML="Tambah Tahapan";
+
+document.getElementById("modal").style.display="flex";
+
+document.getElementById("id").value="";
 nama.value="";
 kategori.value="Psikotes";
 metode.value="DOWNLOAD_UPLOAD";
@@ -293,7 +295,19 @@ function badgeKategori(kategori){
     
 async function edit(idx){
 
-const {data}=await db.from("tests").select("*").eq("id",idx).single();
+const {data,error}=await db
+.from("tests")
+.select("*")
+.eq("id",idx)
+.single();
+
+if(error){
+
+    alert(error.message);
+
+    return;
+
+}
 
 id.value=data.id;
 nama.value=data.nama_test;
