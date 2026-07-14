@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Kelola Tahapan Event</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const SUPABASE_URL="https://wxmxkgmgddmfysazcirl.supabase.co";
+
+const SUPABASE_ANON_KEY="ISI_ANON_KEY_ANDA";
+
+const db=window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+</script>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI;
+}
+
+body{
+background:#f5f7fb;
+}
+
+header{
+
+height:65px;
+
+background:#2563eb;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:0 20px;
+
+color:white;
+
+}
+
+.container{
+
+padding:25px;
+
+}
+
+table{
+
+width:100%;
+
+border-collapse:collapse;
+
+background:white;
+
+}
+
+th{
+
+background:#2563eb;
+
+color:white;
+
+padding:12px;
+
+}
+
+td{
+
+padding:12px;
+
+border-bottom:1px solid #ddd;
+
+}
+
+button{
+
+padding:8px 15px;
+
+border:none;
+
+border-radius:6px;
+
+background:#2563eb;
+
+color:white;
+
+cursor:pointer;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div>
+
+<button
+onclick="location.href='master_event.html'">
+
+← Master Event
+
+</button>
+
+</div>
+
+<h2>
+
+Kelola Tahapan Event
+
+</h2>
+
+<div id="namaEvent">
+
+...
+
+</div>
+
+</header>
+
+<div class="container">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>No</th>
+
+<th>Tahapan</th>
+
+<th>Soal</th>
+
+<th>Petunjuk</th>
+
+<th>Download</th>
+
+<th>Upload</th>
+
+<th>Aksi</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tbody">
+
+</tbody>
+
+</table>
+
+</div>
+
+<script>
+
+const params=new URLSearchParams(location.search);
+
+const eventId=params.get("id");
+
+loadEvent();
+
+async function loadEvent(){
+
+const {data,error}=await db
+
+.from("events")
+
+.select("*")
+
+.eq("id",eventId)
+
+.single();
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+document.getElementById("namaEvent").innerHTML=
+
+data.nama_event;
+
+loadTahapan();
+
+}
+
+</script>
+
+</body>
+</html>
