@@ -44,86 +44,49 @@ th,td{border:1px solid #ddd;padding:8px}
 </div>
 </div>
 
-<div id="recruitment" class="page"><div class="card">Recruitment</div></div>
-<div id="monitoring" class="page"><div class="card">Monitoring</div></div>
-</div>
-</div>
-</div>
-
-<div id="modal">
-<div id="modalBox">
-<h3>Tambah Tahapan</h3>
-<input id="tNama" placeholder="Nama Test">
-<select id="tJenis">
-<option>DOWNLOAD_UPLOAD</option>
-<option>CHECKLIST</option>
-<option>LINK</option>
-</select>
-<input id="tUrutan" type="number" value="1">
-<label><input id="tAktif" type="checkbox" checked> Aktif</label><br><br>
-<button onclick="saveTest()">Simpan</button>
-<button onclick="closeModal()">Batal</button>
-</div>
-</div>
-
 <script>
 let currentUser=null;
 
-
-function openApp(){
- loginPage.style.display="none";
- app.style.display="block";
- loginName.innerText=currentUser.nama||currentUser.email;
- if(currentUser.role==="PESERTA") menu.style.display="none";
-}
-
 function saveSession(){localStorage.setItem("rfs_user",JSON.stringify(currentUser));}
-function restoreSession(){let s=localStorage.getItem("rfs_user");if(!s)return;currentUser=JSON.parse(s);openApp();}
-function logout(){localStorage.removeItem("rfs_user");location.reload();}
 
 async function login(){
  const email=username.value.trim();
  const password=document.getElementById("password").value.trim();
 
  let {data:a}=await db.from("admins").select("*").eq("email",email).eq("password",password).maybeSingle();
- if(a){a.role="ADMIN";currentUser=a;saveSession();openApp();return;}
+if(a){
+
+    a.role="ADMIN";
+
+    currentUser=a;
+
+    saveSession();
+
+    location.href="dashboard.html";
+
+    return;
+
+}
 
  let {data:p}=await db.from("participants").select("*").eq("email",email).eq("password",password).maybeSingle();
- if(p){p.role="PESERTA";currentUser=p;saveSession();openApp();return;}
 
  alert("Email atau Password salah");
 }
-
-async function loadTests(){
- const {data,error}=await db.from("tests").select("*").order("urutan");
- if(error){alert(error.message);return;}
- tblTests.innerHTML="";
- data.forEach(r=>{
-   tblTests.innerHTML+=`<tr>
-   <td>${r.urutan??""}</td>
-   <td>${r.nama_test??""}</td>
-   <td>${r.jenis??""}</td>
-   <td>${r.aktif?"Ya":"Tidak"}</td>
-   </tr>`;
- });
-}
-
-function newTest(){modal.style.display="flex";}
-function closeModal(){modal.style.display="none";}
-
-async function saveTest(){
- const {error}=await db.from("tests").insert({
-  nama_test:tNama.value,
-  jenis:tJenis.value,
-  urutan:Number(tUrutan.value),
-  aktif:tAktif.checked
- });
- if(error){alert(error.message);return;}
- closeModal();
- loadTests();
-}
-
 restoreSession();
+
+function restoreSession(){
+
+    const s=localStorage.getItem("rfs_user");
+
+    if(!s){
+
+        return;
+
+    }
+
+    location.href="dashboard.html";
+
+}
 </script>
 
 </body>
