@@ -179,11 +179,65 @@ async function loadEvents(){
  <td>${e.status||"Aktif"}</td>
  <td>${(e.tahapan||[]).length}</td>
  <td>
- <button onclick="edit('${e.id}')">Edit</button>
+ <button onclick="edit('${e.id}')">
+✏ Edit
+</button>
+
+<button onclick="uploadSoal('${e.id}')">
+📁 Soal
+</button>
  </td>
  </tr>`;
 
  });
+
+}
+
+let eventUpload=null;
+
+async function uploadSoal(id){
+
+    eventUpload=id;
+
+    const {data}=await db
+
+    .from("events")
+
+    .select("*")
+
+    .eq("id",id)
+
+    .single();
+
+    renderUpload(data);
+
+    modalUpload.style.display="flex";
+
+}
+
+function renderUpload(event){
+
+    listUpload.innerHTML="";
+
+    semuaTahapan.forEach(t=>{
+
+        listUpload.innerHTML+=`
+
+        <div style="margin-bottom:15px">
+
+        <b>${t.nama_test}</b>
+
+        <br>
+
+        <input
+        type="file"
+        onchange="prosesUpload(event,'${t.id}')">
+
+        </div>
+
+        `;
+
+    });
 
 }
 
@@ -241,6 +295,24 @@ async function simpan(){
 loadTahapan();
 loadEvents();
 </script>
+<div id="modalUpload" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);justify-content:center;align-items:center;">
 
+<div class="box">
+
+<h3>Upload Soal Event</h3>
+
+<div id="listUpload"></div>
+
+<br>
+
+<button onclick="tutupUpload()">
+
+Tutup
+
+</button>
+
+</div>
+
+</div>
 </body>
 </html>
