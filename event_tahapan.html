@@ -303,12 +303,116 @@ Kelola
 
 }
 
-function editTahapan(id){
+async function editTahapan(id){
 
-alert("Tahapan : "+id);
+const {data,error}=await db
+
+.from("event_tests")
+
+.select("*")
+
+.eq("id",id)
+
+.single();
+
+if(error){
+
+    alert(error.message);
+
+    return;
+
+}
+
+document.getElementById("et_id").value=data.id;
+
+document.getElementById("et_petunjuk").value=data.petunjuk||"";
+
+document.getElementById("et_download").value=
+
+data.buka_download?
+
+data.buka_download.substring(0,16):"";
+
+document.getElementById("et_upload").value=
+
+data.tutup_upload?
+
+data.tutup_upload.substring(0,16):"";
+
+document.getElementById("popup").style.display="flex";
 
 }
 </script>
+<div id="popup"
+style="
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.4);
+justify-content:center;
+align-items:center;">
 
+<div
+style="
+background:white;
+width:600px;
+padding:20px;
+border-radius:10px;">
+
+<h3>Kelola Tahapan</h3>
+
+<input
+type="hidden"
+id="et_id">
+
+<label>Petunjuk</label>
+
+<textarea
+id="et_petunjuk"
+rows="5"></textarea>
+
+<br><br>
+
+<label>Buka Download</label>
+
+<input
+type="datetime-local"
+id="et_download">
+
+<br><br>
+
+<label>Tutup Upload</label>
+
+<input
+type="datetime-local"
+id="et_upload">
+
+<br><br>
+
+<label>Upload Soal</label>
+
+<input
+type="file"
+id="fileSoal">
+
+<br><br>
+
+<button
+onclick="simpanTahapan()">
+
+Simpan
+
+</button>
+
+<button
+onclick="document.getElementById('popup').style.display='none'">
+
+Tutup
+
+</button>
+
+</div>
+
+</div>
 </body>
 </html>
