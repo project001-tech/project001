@@ -177,7 +177,7 @@ async function loadEvents(){
  <td>${e.nama_event}</td>
  <td>${e.periode||""}</td>
  <td>${e.status||"Aktif"}</td>
- <td>${(e.tahapan||[]).length}</td>
+ <td>${(e.event_tests||[]).length}</td>
  <td>
  <button onclick="edit('${e.id}')">
 ✏ Edit
@@ -202,8 +202,12 @@ async function uploadSoal(id){
     const {data}=await db
 
     .from("events")
-
-    .select("*")
+.select(`
+    *,
+    event_tests(
+        id
+    )
+`)
 
     .eq("id",id)
 
@@ -255,40 +259,177 @@ function tutup(){
 
 async function edit(id){
 
- const {data}=await db.from("events").select("*").eq("id",id).single();
+    const {data,error}=await db
 
- eid.value=data.id;
- nama.value=data.nama_event;
- periode.value=data.periode||"";
- renderTahapan((data.tahapan||[]).map(String));
+    .from("events")
 
- modal.style.display="flex";
+    .select(`
+        *,
+        event_tests(
+            test_id
+        )
+    `)
+
+    .eq("id",id)
+
+    .single();
+
+    if(error){
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    document.getElementById("eid").value=data.id;
+
+    document.getElementById("nama").value=data.nama_event;
+
+    document.getElementById("periode").value=data.periode||"";
+
+    const selected=
+
+    (data.event_tests||[])
+
+    .map(x=>String(x.test_id));
+
+    renderTahapan(selected);
+
+    modal.style.display="flex";
 
 }
 
 async function simpan(){
 
- const tahapan=[...daftarTahapan.querySelectorAll("input:checked")].map(x=>x.value);
+    const namaEvent = document.getElementById("nama").value.trim();
 
- const obj={
- nama_event:nama.value,
- periode:periode.value,
- status:"Aktif",
- tahapan:tahapan
- };
+    if(namaEvent==""){
 
- let res;
+        alert("Nama Event wajib diisi");
 
- if(eid.value){
-   res=await db.from("events").update(obj).eq("id",eid.value);
- }else{
-   res=await db.from("events").insert(obj);
- }
+        return;
 
- if(res.error){alert(res.error.message);return;}
+    }
 
- tutup();
- loadEvents();
+    const periode = document.getElementById("periode").value;
+
+    const tahapanDipilih =
+    [...document.querySelectorAll("#daftarTahapan input:checked")];
+
+    if(tahapanDipilih.length==0){
+
+        alert("Pilih minimal satu tahapan.");
+
+        return;
+
+    }
+
+    const obj={
+
+        nama_event:namaEvent,
+
+        periode:periode,
+
+        status:"Aktif"
+
+    };
+
+    let eventId=null;
+
+    if(document.getElementById("eid").value==""){
+
+        const {data,error}=await db
+
+        .from("events")
+
+        .insert(obj)
+
+        .select()
+
+        .single();
+
+        if(error){
+
+            alert(error.message);
+
+            return;
+
+        }
+
+        eventId=data.id;
+
+    }else{
+
+        eventId=document.getElementById("eid").value;
+
+        const {error}=await db
+
+        .from("events")
+
+        .update(obj)
+
+        .eq("id",eventId);
+
+        if(error){
+
+            alert(error.message);
+
+            return;
+
+        }
+
+    }
+
+    await simpanTahapan(eventId,tahapanDipilih);
+
+}
+
+async function simpanTahapan(eventId,tahapanDipilih){
+
+    await db
+
+    .from("event_tests")
+
+    .delete()
+
+    .eq("event_id",eventId);
+
+    const rows=[];
+
+    tahapanDipilih.forEach((item,index)=>{
+
+        rows.push({
+
+            event_id:eventId,
+
+            test_id:Number(item.value),
+
+            urutan:index+1
+
+        });
+
+    });
+
+    const {error}=await db
+
+    .from("event_tests")
+
+    .insert(rows);
+
+    if(error){
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    alert("Event berhasil disimpan.");
+
+    tutup();
+
+    loadEvents();
 
 }
 
