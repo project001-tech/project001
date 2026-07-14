@@ -436,7 +436,7 @@ async function loadEvent(){
 
     .from("events")
 
-    .select("*")
+    .select("id,nama_event")
 
     .order("nama_event");
 
@@ -482,7 +482,7 @@ async function loadPeserta(){
 
     .from("participants")
 
-    .select("*")
+    .select("id,nama,email,event_id")
 
     .order("nama");
 
@@ -638,6 +638,8 @@ async function pilihEvent(){
 
     semuaTahapan.length;
 
+    renderPeserta();
+
 }
 
 <!-- ====================================
@@ -750,7 +752,7 @@ async function simpanPeserta(){
 
             .eq("test_id",t.test_id);
 
-           if((cek.data || []).length>0){
+           if((cek || []).length>0)
 
     skip++;
 
