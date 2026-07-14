@@ -138,16 +138,36 @@ async function edit(id){
  status.value=data.status||"Aktif";
  modal.style.display="flex";
 }
+function generateToken(){
 
+    return Math.random()
+
+    .toString(36)
+
+    .substring(2,12)
+
+    .toUpperCase();
+
+}
 async function simpan(){
 
- const obj={
-  nama:nama.value,
-  email:email.value,
-  password:password.value,
-  event_id:event.value,
-  status:status.value
- };
+const obj={
+
+    nama:nama.value,
+
+    email:email.value,
+
+    password:password.value,
+
+    event_id:event.value
+
+};
+
+if(pid.value==""){
+
+    obj.invite_token=generateToken();
+
+}
 
  let res;
 
