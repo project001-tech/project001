@@ -262,25 +262,34 @@ ${r.soal_file ??
 
 <td>
 
-${r.petunjuk ??
-
-"-"}
-
-</td>
-
-<td>
-
-${r.buka_download ??
-
-"-"}
+${r.petunjuk
+?
+"✔ Ada"
+:
+"<span style='color:red'>Belum</span>"
+}
 
 </td>
 
 <td>
 
-${r.tutup_upload ??
+${r.buka_download
+?
+new Date(r.buka_download).toLocaleString("id-ID")
+:
+"-"
+}
 
-"-"}
+</td>
+
+<td>
+
+${r.tutup_upload
+?
+new Date(r.tutup_upload).toLocaleString("id-ID")
+:
+"-"
+}
 
 </td>
 
@@ -320,6 +329,50 @@ if(error){
     alert(error.message);
 
     return;
+
+}
+
+async function simpanTahapan(){
+
+const id=document.getElementById("et_id").value;
+
+const obj={
+
+    petunjuk:document.getElementById("et_petunjuk").value,
+
+    buka_download:
+    document.getElementById("et_download").value==""?
+    null:
+    document.getElementById("et_download").value,
+
+    tutup_upload:
+    document.getElementById("et_upload").value==""?
+    null:
+    document.getElementById("et_upload").value
+
+};
+
+const {error}=await db
+
+.from("event_tests")
+
+.update(obj)
+
+.eq("id",id);
+
+if(error){
+
+    alert(error.message);
+
+    return;
+
+}
+
+document.getElementById("popup").style.display="none";
+
+loadTahapan();
+
+alert("Data berhasil disimpan");
 
 }
 
