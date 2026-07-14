@@ -332,50 +332,6 @@ if(error){
 
 }
 
-async function simpanTahapan(){
-
-const id=document.getElementById("et_id").value;
-
-const obj={
-
-    petunjuk:document.getElementById("et_petunjuk").value,
-
-    buka_download:
-    document.getElementById("et_download").value==""?
-    null:
-    document.getElementById("et_download").value,
-
-    tutup_upload:
-    document.getElementById("et_upload").value==""?
-    null:
-    document.getElementById("et_upload").value
-
-};
-
-const {error}=await db
-
-.from("event_tests")
-
-.update(obj)
-
-.eq("id",id);
-
-if(error){
-
-    alert(error.message);
-
-    return;
-
-}
-
-document.getElementById("popup").style.display="none";
-
-loadTahapan();
-
-alert("Data berhasil disimpan");
-
-}
-
 document.getElementById("et_id").value=data.id;
 
 document.getElementById("et_petunjuk").value=data.petunjuk||"";
@@ -456,6 +412,50 @@ onclick="simpanTahapan()">
 Simpan
 
 </button>
+
+async function simpanTahapan(){
+
+const id=document.getElementById("et_id").value;
+
+const obj={
+
+    petunjuk:document.getElementById("et_petunjuk").value,
+
+    buka_download:
+    document.getElementById("et_download").value==""?
+    null:
+    document.getElementById("et_download").value,
+
+    tutup_upload:
+    document.getElementById("et_upload").value==""?
+    null:
+    document.getElementById("et_upload").value
+
+};
+
+const {error}=await db
+
+.from("event_tests")
+
+.update(obj)
+
+.eq("id",id);
+
+if(error){
+
+    alert(error.message);
+
+    return;
+
+}
+
+document.getElementById("popup").style.display="none";
+
+loadTahapan();
+
+alert("Data berhasil disimpan");
+
+}
 
 <button
 onclick="document.getElementById('popup').style.display='none'">
