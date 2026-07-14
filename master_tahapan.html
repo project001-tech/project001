@@ -94,7 +94,6 @@ Non Aktif
 <th>Kategori</th>
 <th>Metode</th>
 <th>Durasi</th>
-<th>Durasi</th>
 <th>Status</th>
 <th>Aksi</th>
 </tr>
@@ -169,70 +168,82 @@ Non Aktif
 <script>
 async function loadData(){
 
-const cari=document.getElementById("txtCari").value.toLowerCase();
+    const cari = document.getElementById("txtCari").value.toLowerCase();
 
-const {data,error}=await db.from("tests").select("*").order("urutan");
+    const {data,error}=await db
+    .from("tests")
+    .select("*")
+    .order("urutan");
 
-if(error){alert(error.message);return;}
+    if(error){
+        alert(error.message);
+        return;
+    }
+
+    document.getElementById("jmlTahapan").innerHTML=data.length;
+
+    document.getElementById("aktifTahapan").innerHTML=
+    data.filter(x=>x.aktif).length;
+
+    document.getElementById("nonAktifTahapan").innerHTML=
+    data.filter(x=>!x.aktif).length;
+
+    const tbody=document.getElementById("tbody");
+
+    const tbody=document.getElementById("tbody");
 
 tbody.innerHTML="";
 
-data.filter(x=>(x.nama_test||"").toLowerCase().includes(cari))
-.forEach(r=>{
+    data
+    .filter(x=>(x.nama_test||"").toLowerCase().includes(cari))
+    .forEach(r=>{
 
-document.getElementById("jmlTahapan").innerHTML=data.length;
+        tbody.innerHTML+=`
 
-document.getElementById("aktifTahapan").innerHTML=
+        <tr>
 
-data.filter(x=>x.aktif).length;
+            <td>${r.urutan||""}</td>
 
-document.getElementById("nonAktifTahapan").innerHTML=
+            <td>${r.nama_test||""}</td>
 
-data.filter(x=>!x.aktif).length;    
+            <td>${badgeKategori(r.kategori)}</td>
 
-tbody.innerHTML+=`
-<tr>
-<td>${r.urutan||""}</td>
-<td>${r.nama_test||""}</td>
-<td>
+            <td>${r.metode||""}</td>
 
-${badgeKategori(r.kategori)}
+            <td>${r.durasi_menit||0} Menit</td>
 
-</td>
-<td>${r.metode||""}</td>
-<td>${r.durasi_menit||"-"}</td>    
-<td>${r.durasi_menit} Menit</td>
+            <td>
 
-<td>
+                ${r.aktif
+                    ? "<span style='color:green;font-weight:bold'>Aktif</span>"
+                    : "<span style='color:red;font-weight:bold'>Non Aktif</span>"
+                }
 
-${r.aktif
+            </td>
 
-? "<span style='color:green;font-weight:bold'>Aktif</span>"
+            <td>
 
-: "<span style='color:red;font-weight:bold'>Non Aktif</span>"}
+                <button onclick="edit('${r.id}')">
+                    ✏️
+                </button>
 
-</td>
-<td>
+                <button onclick="statusTahapan('${r.id}',${r.aktif})">
+                    ${r.aktif?"OFF":"ON"}
+                </button>
 
-<button onclick="edit('${r.id}')">
-Edit
-</button>
+                <button
+                    style="background:#dc2626"
+                    onclick="hapusTahapan('${r.id}')">
+                    🗑
+                </button>
 
-<button onclick="statusTahapan('${r.id}',${r.aktif})">
-${r.aktif?"Non Aktif":"Aktifkan"}
-</button>
+            </td>
 
-<button
-style="background:#dc2626;color:white;"
-onclick="hapusTahapan('${r.id}')">
+        </tr>
 
-Delete
+        `;
 
-</button>
-
-</td>
-</tr>`;
-});
+    });
 
 }
 
@@ -302,6 +313,16 @@ modal.style.display="flex";
 
 async function simpan(){
 
+    
+if(nama.value.trim()==""){
+
+    alert("Nama Tahapan wajib diisi");
+
+    nama.focus();
+
+    return;
+
+}    
 const obj={
 nama_test:nama.value,
 kategori:kategori.value,
@@ -329,11 +350,27 @@ loadData();
 
 async function statusTahapan(idx,status){
 
-await db.from("tests")
-.update({aktif:!status})
-.eq("id",idx);
+    const {error}=await db
 
-loadData();
+    .from("tests")
+
+    .update({
+
+        aktif:!status
+
+    })
+
+    .eq("id",idx);
+
+    if(error){
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    loadData();
 
 }
 
