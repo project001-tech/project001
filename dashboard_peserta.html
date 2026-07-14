@@ -825,9 +825,77 @@ sementara
 
 ====================================*/
 
-function downloadSoal(id){
+async function downloadSoal(eventTestId){
 
-alert("Download soal : "+id);
+// ambil data tahapan
+
+const {data,error}=await db
+
+.from("event_tests")
+
+.select("*")
+
+.eq("id",eventTestId)
+
+.single();
+
+if(error){
+
+    alert(error.message);
+
+    return;
+
+}
+
+// belum upload soal
+
+if(!data.soal_file){
+
+    alert("Soal belum tersedia.");
+
+    return;
+
+}
+
+// ambil public url
+
+const {data:urlData}=db.storage
+
+.from("recruitment-files")
+
+.getPublicUrl(data.soal_file);
+
+// buka file
+
+window.open(urlData.publicUrl,"_blank");
+
+// update progress
+
+const p=progressData.find(x=>x.test_id==data.test_id);
+
+if(p){
+
+await db
+
+.from("progress")
+
+.update({
+
+status:"DOWNLOADED",
+
+download_count:(p.download_count||0)+1,
+
+download_first:p.download_first || new Date(),
+
+download_last:new Date()
+
+})
+
+.eq("id",p.id);
+
+}
+
+loadProgress();
 
 }
 
