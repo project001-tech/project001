@@ -254,9 +254,10 @@ tbody.innerHTML+=`
 
 <td>
 
-${r.soal_file ??
-
-"<span style='color:red'>Belum Upload</span>"}
+${r.soal_file
+? "<span style='color:green;font-weight:bold'>✔ Sudah Upload</span>"
+: "<span style='color:red'>Belum Upload</span>"
+}
 
 </td>
 
@@ -428,45 +429,79 @@ Tutup
 
 async function simpanTahapan(){
 
-const id=document.getElementById("et_id").value;
+    const id=document.getElementById("et_id").value;
 
-const obj={
+    const file=document.getElementById("fileSoal").files[0];
 
-    petunjuk:document.getElementById("et_petunjuk").value,
+    let namaFile=null;
 
-    buka_download:
-    document.getElementById("et_download").value==""?
-    null:
-    document.getElementById("et_download").value,
+    // Upload file jika dipilih
+    if(file){
 
-    tutup_upload:
-    document.getElementById("et_upload").value==""?
-    null:
-    document.getElementById("et_upload").value
+        namaFile="soal/"+Date.now()+"_"+file.name;
 
-};
+        const {error:uploadError}=await db.storage
 
-const {error}=await db
+        .from("recruitment-files")
 
-.from("event_tests")
+        .upload(namaFile,file,{
+            upsert:true
+        });
 
-.update(obj)
+        if(uploadError){
 
-.eq("id",id);
+            alert(uploadError.message);
 
-if(error){
+            return;
 
-    alert(error.message);
+        }
 
-    return;
+    }
 
-}
+    const obj={
 
-document.getElementById("popup").style.display="none";
+        petunjuk:document.getElementById("et_petunjuk").value,
 
-loadTahapan();
+        buka_download:
+        document.getElementById("et_download").value==""?
+        null:
+        document.getElementById("et_download").value,
 
-alert("Data berhasil disimpan");
+        tutup_upload:
+        document.getElementById("et_upload").value==""?
+        null:
+        document.getElementById("et_upload").value
+
+    };
+
+    // Hanya update soal_file jika memang upload file baru
+    if(namaFile){
+
+        obj.soal_file=namaFile;
+
+    }
+
+    const {error}=await db
+
+    .from("event_tests")
+
+    .update(obj)
+
+    .eq("id",id);
+
+    if(error){
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    document.getElementById("popup").style.display="none";
+
+    loadTahapan();
+
+    alert("Data berhasil disimpan");
 
 }
 
