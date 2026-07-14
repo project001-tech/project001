@@ -130,7 +130,9 @@ th{background:#eef3ff}
 <input id="password" value="123456">
 
 <label>Event</label>
-<select id="event"></select>
+<select id="event">
+    <option value="">-- Pilih Event --</option>
+</select>
 
 <label>Status</label>
 <select id="status">
@@ -148,11 +150,42 @@ th{background:#eef3ff}
 
 <script>
 async function loadEvent(){
- const {data}=await db.from("events").select("id,nama_event").order("nama_event");
- event.innerHTML="";
- (data||[]).forEach(e=>{
-   event.innerHTML+=`<option value="${e.id}">${e.nama_event}</option>`;
- });
+
+    const {data,error}=await db
+    .from("events")
+    .select("id,nama_event")
+    .order("nama_event");
+
+    if(error){
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    const cmb=document.getElementById("event");
+
+    if(!cmb){
+
+        console.error("Dropdown dengan id='event' tidak ditemukan.");
+
+        return;
+
+    }
+
+    cmb.innerHTML="<option value=''>-- Pilih Event --</option>";
+
+    (data||[]).forEach(e=>{
+
+        cmb.innerHTML+=`
+            <option value="${e.id}">
+                ${e.nama_event}
+            </option>
+        `;
+
+    });
+
 }
 
 async function loadPeserta(){
