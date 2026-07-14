@@ -89,13 +89,13 @@ Non Aktif
 <table>
 <thead>
 <tr>
-<th>Urut</th>
-<th>Nama</th>
-<th>Kategori</th>
-<th>Metode</th>
-<th>Durasi</th>
-<th>Status</th>
-<th>Aksi</th>
+    <th>Urutan</th>
+    <th>Nama Test</th>
+    <th>Kategori</th>
+    <th>Metode</th>
+    <th>Durasi</th>
+    <th>Status</th>
+    <th width="220">Aksi</th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
@@ -190,9 +190,7 @@ async function loadData(){
 
     const tbody=document.getElementById("tbody");
 
-    const tbody=document.getElementById("tbody");
-
-tbody.innerHTML="";
+    tbody.innerHTML="";
 
     data
     .filter(x=>(x.nama_test||"").toLowerCase().includes(cari))
