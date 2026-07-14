@@ -206,6 +206,108 @@ loadTahapan();
 
 }
 
+async function loadTahapan(){
+
+const {data,error}=await db
+
+.from("event_tests")
+
+.select(`
+    *,
+    tests (
+        id,
+        nama_test
+    )
+`)
+
+.eq("event_id",eventId)
+
+.order("urutan");
+
+if(error){
+
+    alert(error.message);
+
+    return;
+
+}
+
+renderTahapan(data);
+
+}
+
+function renderTahapan(data){
+
+const tbody=document.getElementById("tbody");
+
+tbody.innerHTML="";
+
+data.forEach((r,index)=>{
+
+tbody.innerHTML+=`
+
+<tr>
+
+<td>${index+1}</td>
+
+<td>${r.tests.nama_test}</td>
+
+<td>
+
+${r.soal_file ??
+
+"<span style='color:red'>Belum Upload</span>"}
+
+</td>
+
+<td>
+
+${r.petunjuk ??
+
+"-"}
+
+</td>
+
+<td>
+
+${r.buka_download ??
+
+"-"}
+
+</td>
+
+<td>
+
+${r.tutup_upload ??
+
+"-"}
+
+</td>
+
+<td>
+
+<button
+onclick="editTahapan('${r.id}')">
+
+Kelola
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+function editTahapan(id){
+
+alert("Tahapan : "+id);
+
+}
 </script>
 
 </body>
