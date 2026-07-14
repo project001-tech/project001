@@ -631,17 +631,30 @@ const {data,error}=await db
 
 .from("progress")
 
-.select("*")
-
+.select(`
+    *,
+    tests(
+        id,
+        nama_test
+    ),
+    event_tests(
+        id,
+        soal_file,
+        petunjuk,
+        buka_download,
+        tutup_download,
+        buka_upload,
+        tutup_upload
+    )
+`)
 .eq("participant_id",peserta.id)
-
 .eq("event_id",eventId);
 
 if(error){
 
-alert(error.message);
+    alert(error.message);
 
-return;
+    return;
 
 }
 
@@ -665,87 +678,129 @@ tbody.innerHTML="";
 
 let selesai=0;
 
-tahapanData.forEach((row,index)=>{
+progressData.forEach((r,index)=>{
 
-const p=progressData.find(x=>x.test_id==row.test_id);
+const et=r.event_tests;
 
-let status="BELUM";
+let status=r.status||"BELUM";
 
 let warna="statusBelum";
 
-let tombolDownload=
-"<button class='btn btnDownload'>Download</button>";
+if(status=="DOWNLOADED") warna="statusDownload";
 
-let tombolUpload=
-"<button class='btn btnDisable'>Upload</button>";
+if(status=="UPLOADED"){
 
-if(p){
+    warna="statusUpload";
 
-status=p.status||"BELUM";
+    selesai++;
 
-if(status=="DOWNLOADED"){
+}
 
-warna="statusDownload";
+const sekarang=new Date();
 
-tombolDownload=
+let btnDownload="";
+
+let btnUpload="";
+
+let downloadBoleh=false;
+
+let uploadBoleh=false;
+
+/* ===========================
+DOWNLOAD
+=========================== */
+
+if(et && et.buka_download && et.tutup_download){
+
+    if(
+
+        sekarang>=new Date(et.buka_download)
+
+        &&
+
+        sekarang<=new Date(et.tutup_download)
+
+    ){
+
+        downloadBoleh=true;
+
+    }
+
+}
+
+/* ===========================
+UPLOAD
+=========================== */
+
+if(et && et.buka_upload && et.tutup_upload){
+
+    if(
+
+        sekarang>=new Date(et.buka_upload)
+
+        &&
+
+        sekarang<=new Date(et.tutup_upload)
+
+    ){
+
+        uploadBoleh=true;
+
+    }
+
+}
+
+if(downloadBoleh){
+
+btnDownload=
 
 `<button
-class="btn btnDownload"
-onclick="downloadSoal('${row.id}')">
 
-Download Lagi
+class="btn btnDownload"
+
+onclick="downloadSoal('${r.id}')">
+
+Download
 
 </button>`;
 
-tombolUpload=
+}else{
+
+btnDownload=
 
 `<button
+
+class="btn btnDisable">
+
+Terkunci
+
+</button>`;
+
+}
+
+if(uploadBoleh){
+
+btnUpload=
+
+`<button
+
 class="btn btnUpload"
-onclick="uploadJawaban('${row.id}')">
+
+onclick="uploadJawaban('${r.id}')">
 
 Upload
 
 </button>`;
 
-}
-
-if(status=="UPLOADED"){
-
-warna="statusUpload";
-
-tombolDownload=
-
-`<button
-class="btn btnDownload"
-onclick="downloadSoal('${row.id}')">
-
-Download
-
-</button>`;
-
-tombolUpload=
-
-`<button
-class="btn btnUpload"
-onclick="uploadJawaban('${row.id}')">
-
-Upload Lagi
-
-</button>`;
-
-selesai++;
-
-}
-
 }else{
 
-tombolDownload=
+btnUpload=
 
 `<button
-class="btn btnDownload"
-onclick="downloadSoal('${row.id}')">
 
-Download
+class="btn btnDisable">
+
+Belum Dibuka
 
 </button>`;
 
@@ -755,17 +810,9 @@ tbody.innerHTML+=`
 
 <tr>
 
-<td>
+<td>${index+1}</td>
 
-${index+1}
-
-</td>
-
-<td>
-
-${row.tests.nama_test}
-
-</td>
+<td>${r.tests.nama_test}</td>
 
 <td>
 
@@ -779,13 +826,13 @@ ${status}
 
 <td>
 
-${tombolDownload}
+${btnDownload}
 
 </td>
 
 <td>
 
-${tombolUpload}
+${btnUpload}
 
 </td>
 
@@ -797,15 +844,15 @@ ${tombolUpload}
 
 document.getElementById("infoTotal").innerHTML=
 
-tahapanData.length;
+progressData.length;
 
 let persen=0;
 
-if(tahapanData.length>0){
+if(progressData.length>0){
 
 persen=Math.round(
 
-(selesai/tahapanData.length)*100
+(selesai/progressData.length)*100
 
 );
 
@@ -816,7 +863,6 @@ document.getElementById("infoProgress").innerHTML=
 persen+"%";
 
 }
-
 /*====================================
 
 DOWNLOAD
@@ -825,31 +871,19 @@ sementara
 
 ====================================*/
 
-async function downloadSoal(eventTestId){
+async function downloadSoal(progressId){
 
-// ambil data tahapan
+const p=progressData.find(x=>x.id==progressId);
 
-const {data,error}=await db
-
-.from("event_tests")
-
-.select("*")
-
-.eq("id",eventTestId)
-
-.single();
-
-if(error){
-
-    alert(error.message);
+if(!p){
 
     return;
 
 }
 
-// belum upload soal
+const file=p.event_tests.soal_file;
 
-if(!data.soal_file){
+if(!file){
 
     alert("Soal belum tersedia.");
 
@@ -857,23 +891,13 @@ if(!data.soal_file){
 
 }
 
-// ambil public url
-
-const {data:urlData}=db.storage
+const {data:url}=db.storage
 
 .from("recruitment-files")
 
-.getPublicUrl(data.soal_file);
+.getPublicUrl(file);
 
-// buka file
-
-window.open(urlData.publicUrl,"_blank");
-
-// update progress
-
-const p=progressData.find(x=>x.test_id==data.test_id);
-
-if(p){
+window.open(url.publicUrl,"_blank");
 
 await db
 
@@ -891,9 +915,7 @@ download_last:new Date()
 
 })
 
-.eq("id",p.id);
-
-}
+.eq("id",progressId);
 
 loadProgress();
 
