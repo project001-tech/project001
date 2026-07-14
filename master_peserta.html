@@ -25,10 +25,70 @@ th,td{border:1px solid #ddd;padding:10px}
 th{background:#eef3ff}
 #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);align-items:center;justify-content:center}
 .box{background:#fff;width:520px;padding:20px;border-radius:10px}
+
+.topbar{
+
+    height:65px;
+
+    background:#2563eb;
+
+    color:white;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:0 20px;
+
+}
+
+.backBtn{
+
+    background:white;
+
+    color:#2563eb;
+
+    border:none;
+
+    padding:8px 16px;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+}
+
+.backBtn:hover{
+
+    background:#e5e7eb;
+
+}
 </style>
 </head>
 <body>
 
+<header class="topbar">
+
+    <button class="backBtn"
+        onclick="location.href='dashboard.html'">
+
+        ← Dashboard
+
+    </button>
+
+    <h2>Master Tahapan</h2>
+
+    <div id="namaAdmin">
+
+        Administrator
+
+    </div>
+
+</header>
 <header>Master Peserta</header>
 
 <div class="container">
