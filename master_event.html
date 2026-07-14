@@ -179,8 +179,10 @@ async function loadEvents(){
  <td>${e.status||"Aktif"}</td>
  <td>${(e.event_tests||[]).length}</td>
  <td>
- <button onclick="edit('${e.id}')">
-✏ Edit
+ <button onclick="edit('${e.id}')">✏ Edit</button>
+
+<button onclick="kelolaSoal('${e.id}')">
+📁 Soal
 </button>
 
 <button onclick="uploadSoal('${e.id}')">
@@ -194,6 +196,13 @@ async function loadEvents(){
 }
 
 let eventUpload=null;
+
+ function kelolaSoal(eventId){
+
+    location.href=
+    "event_tahapan.html?id="+eventId;
+
+}
 
 async function uploadSoal(id){
 
