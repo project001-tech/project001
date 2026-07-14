@@ -44,36 +44,6 @@ th,td{border:1px solid #ddd;padding:8px}
 </div>
 </div>
 
-<div id="app">
-<header>
-<div>Recruitment Flow System</div>
-<div><span id="loginName"></span> <button onclick="logout()">Logout</button></div>
-</header>
-
-<div class="main">
-<aside id="menu">
-<button onclick="showPage('dashboard')">Dashboard</button>
-<button onclick="showPage('master')">Master</button>
-<button onclick="showPage('recruitment')">Recruitment</button>
-<button onclick="showPage('monitoring')">Monitoring</button>
-</aside>
-
-<div id="content">
-<div id="dashboard" class="page active"><div class="card">Dashboard</div></div>
-
-<div id="master" class="page">
-<div class="card">
-<h3>Master Tahapan</h3>
-<p><button onclick="loadTests()">Refresh Data</button> <button onclick="newTest()">+ Tambah</button></p>
-<table>
-<thead>
-<tr><th>Urutan</th><th>Nama Test</th><th>Jenis</th><th>Aktif</th></tr>
-</thead>
-<tbody id="tblTests"></tbody>
-</table>
-</div>
-</div>
-
 <div id="recruitment" class="page"><div class="card">Recruitment</div></div>
 <div id="monitoring" class="page"><div class="card">Monitoring</div></div>
 </div>
@@ -99,10 +69,6 @@ th,td{border:1px solid #ddd;padding:8px}
 <script>
 let currentUser=null;
 
-function showPage(id){
- document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
- document.getElementById(id).classList.add("active");
-}
 
 function openApp(){
  loginPage.style.display="none";
