@@ -141,8 +141,23 @@ tbody.innerHTML+=`
 <td>${r.durasi_menit||"-"}</td>
 <td>${r.aktif?"Aktif":"Non Aktif"}</td>
 <td>
-<button onclick="edit('${r.id}')">Edit</button>
-<button onclick="statusTahapan('${r.id}',${r.aktif})">${r.aktif?"Non Aktif":"Aktifkan"}</button>
+
+<button onclick="edit('${r.id}')">
+Edit
+</button>
+
+<button onclick="statusTahapan('${r.id}',${r.aktif})">
+${r.aktif?"Non Aktif":"Aktifkan"}
+</button>
+
+<button
+style="background:#dc2626;color:white;"
+onclick="hapusTahapan('${r.id}')">
+
+Delete
+
+</button>
+
 </td>
 </tr>`;
 });
@@ -217,6 +232,40 @@ await db.from("tests")
 .eq("id",idx);
 
 loadData();
+
+}
+
+/*==========================================
+HAPUS TAHAPAN
+==========================================*/
+
+async function hapusTahapan(id){
+
+    if(!confirm("Yakin ingin menghapus tahapan ini?")){
+
+        return;
+
+    }
+
+    const {error}=await db
+
+    .from("tests")
+
+    .delete()
+
+    .eq("id",id);
+
+    if(error){
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    alert("Tahapan berhasil dihapus");
+
+    loadData();
 
 }
 
