@@ -9,6 +9,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<input
+type="file"
+id="fileJawaban"
+style="display:none"
+onchange="prosesUpload()">
+
 <script>
 
 const SUPABASE_URL="https://wxmxkgmgddmfysazcirl.supabase.co";
@@ -505,6 +511,8 @@ let progressData=[];
 
 let tahapanData=[];
 
+let progressUploadId=null;
+
 /*====================================
 
 CEK LOGIN
@@ -700,7 +708,35 @@ const sekarang=new Date();
 
 let btnDownload="";
 
-let btnUpload="";
+if(status=="UPLOADED"){
+
+btnUpload=
+
+`<button
+
+class="btn btnUpload"
+
+onclick="uploadJawaban('${r.id}')">
+
+Upload Lagi
+
+</button>`;
+
+}else{
+
+btnUpload=
+
+`<button
+
+class="btn btnUpload"
+
+onclick="uploadJawaban('${r.id}')">
+
+Upload
+
+</button>`;
+
+}
 
 let downloadBoleh=false;
 
@@ -929,17 +965,143 @@ sementara
 
 ====================================*/
 
-function uploadJawaban(id){
+function uploadJawaban(progressId){
 
-alert("Upload jawaban : "+id);
+    progressUploadId=progressId;
+
+    document
+    .getElementById("fileJawaban")
+    .click();
 
 }
 
-/*====================================
+async function prosesUpload(){
 
-START
+const file=document
+.getElementById("fileJawaban")
+.files[0];
 
-====================================*/
+if(!file){
+
+    return;
+
+}
+
+const p=progressData.find(x=>x.id==progressUploadId);
+
+if(!p){
+
+    alert("Progress tidak ditemukan.");
+
+    return;
+
+}
+
+const namaFile=
+
+"jawaban/"
+
++
+
+p.event_id
+
++
+
+"/"
+
++
+
+p.participant_id
+
++
+
+"/"
+
++
+
+p.test_id
+
++
+
+"/"
+
++
+
+Date.now()
+
++
+
+"_"
+
++
+
+file.name;
+
+const upload=await db.storage
+
+.from("recruitment-files")
+
+.upload(
+
+namaFile,
+
+file,
+
+{
+
+upsert:true
+
+}
+
+);
+
+if(upload.error){
+
+    alert(upload.error.message);
+
+    return;
+
+}
+
+const update=await db
+
+.from("progress")
+
+.update({
+
+    jawaban_file:namaFile,
+
+    status:"UPLOADED",
+
+    upload_count:(p.upload_count||0)+1,
+
+    upload_first:
+
+        p.upload_first ||
+
+        new Date(),
+
+    upload_last:
+
+        new Date()
+
+})
+
+.eq("id",progressUploadId);
+
+if(update.error){
+
+    alert(update.error.message);
+
+    return;
+
+}
+
+alert("Jawaban berhasil diupload.");
+
+loadProgress();
+
+}
 
 cekLogin();
 
