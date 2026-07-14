@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Peserta Event</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const SUPABASE_URL="https://wxmxkgmgddmfysazcirl.supabase.co";
+
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4bXhrZ21nZGRtZnlzYXpjaXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5MjkwMTEsImV4cCI6MjA5OTUwNTAxMX0.4xqkf2H0BGW8ds3SG2VS4mzSjJiL8ZOKJw1ztGD77LU";
+
+const db=window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+</script>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,Arial;
+}
+
+body{
+background:#f5f7fb;
+}
+
+header{
+
+height:65px;
+
+background:#2563eb;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:0 25px;
+
+color:white;
+
+}
+
+.backBtn{
+
+background:white;
+
+color:#2563eb;
+
+border:none;
+
+padding:8px 18px;
+
+border-radius:6px;
+
+cursor:pointer;
+
+font-weight:bold;
+
+}
+
+.container{
+
+max-width:1200px;
+
+margin:auto;
+
+padding:25px;
+
+}
+
+.card{
+
+background:white;
+
+border-radius:12px;
+
+padding:20px;
+
+margin-bottom:20px;
+
+box-shadow:0 4px 15px rgba(0,0,0,.08);
+
+}
+
+.card h3{
+
+margin-bottom:15px;
+
+color:#1e3a8a;
+
+}
+
+select{
+
+width:100%;
+
+padding:12px;
+
+border:1px solid #ddd;
+
+border-radius:8px;
+
+margin-top:10px;
+
+margin-bottom:20px;
+
+}
+
+.search{
+
+width:100%;
+
+padding:12px;
+
+border:1px solid #ddd;
+
+border-radius:8px;
+
+margin-bottom:15px;
+
+}
+
+.list{
+
+border:1px solid #ddd;
+
+border-radius:8px;
+
+max-height:450px;
+
+overflow:auto;
+
+}
+
+.item{
+
+padding:12px;
+
+display:flex;
+
+align-items:center;
+
+gap:10px;
+
+border-bottom:1px solid #eee;
+
+}
+
+.item:hover{
+
+background:#f8fbff;
+
+}
+
+.statGrid{
+
+display:grid;
+
+grid-template-columns:repeat(3,1fr);
+
+gap:15px;
+
+margin-top:20px;
+
+}
+
+.stat{
+
+background:#eef4ff;
+
+padding:20px;
+
+border-radius:10px;
+
+text-align:center;
+
+}
+
+.stat h2{
+
+color:#2563eb;
+
+margin-bottom:5px;
+
+}
+
+button.primary{
+
+background:#2563eb;
+
+color:white;
+
+border:none;
+
+padding:12px 20px;
+
+border-radius:8px;
+
+cursor:pointer;
+
+font-weight:bold;
+
+margin-top:20px;
+
+}
+
+button.primary:hover{
+
+background:#1d4ed8;
+
+}
+
+#progressBox{
+
+margin-top:20px;
+
+background:#111827;
+
+color:#22c55e;
+
+padding:15px;
+
+border-radius:10px;
+
+font-family:Consolas;
+
+height:180px;
+
+overflow:auto;
+
+white-space:pre-line;
+
+}
+
+@media(max-width:900px){
+
+.statGrid{
+
+grid-template-columns:1fr;
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<button
+class="backBtn"
+onclick="location.href='dashboard.html'">
+
+← Dashboard
+
+</button>
+
+<h2>
+
+Peserta Event
+
+</h2>
+
+<div>
+
+Recruitment Flow System
+
+</div>
+
+</header>
+
+<div class="container">
+
+<div class="card">
+
+<h3>
+
+Pilih Event Recruitment
+
+</h3>
+
+<select id="eventSelect">
+
+<option value="">
+
+Memuat Event...
+
+</option>
+
+</select>
+
+</div>
+
+<div class="card">
+
+<h3>
+
+Daftar Peserta
+
+</h3>
+
+<input
+class="search"
+id="txtCari"
+placeholder="Cari peserta..."
+onkeyup="filterPeserta()">
+
+<div
+class="list"
+id="listPeserta">
+
+<div
+style="padding:20px;text-align:center;">
+
+Memuat peserta...
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="statGrid">
+
+<div class="stat">
+
+<h2 id="totalPeserta">
+
+0
+
+</h2>
+
+<div>
+
+Total Peserta
+
+</div>
+
+</div>
+
+<div class="stat">
+
+<h2 id="dipilih">
+
+0
+
+</h2>
+
+<div>
+
+Dipilih
+
+</div>
+
+</div>
+
+<div class="stat">
+
+<h2 id="totalTahapan">
+
+0
+
+</h2>
+
+<div>
+
+Tahapan Event
+
+</div>
+
+</div>
+
+</div>
+
+<button
+class="primary"
+onclick="simpanPeserta()">
+
+💾 Simpan Peserta ke Event
+
+</button>
+
+<div id="progressBox">
+
+Menunggu proses...
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+<script>
+
+let semuaPeserta=[];
+let semuaEvent=[];
+let semuaTahapan=[];
+
+/*====================================
+START
+====================================*/
+
+window.onload=async()=>{
+
+    await loadEvent();
+
+    await loadPeserta();
+
+}
+
+/*====================================
+LOAD EVENT
+====================================*/
+
+async function loadEvent(){
+
+    const {data,error}=await db
+
+    .from("events")
+
+    .select("*")
+
+    .order("nama_event");
+
+    if(error){
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    semuaEvent=data||[];
+
+    const cmb=document.getElementById("eventSelect");
+
+    cmb.innerHTML="<option value=''>-- Pilih Event --</option>";
+
+    semuaEvent.forEach(e=>{
+
+        cmb.innerHTML+=`
+
+        <option value="${e.id}">
+
+            ${e.nama_event}
+
+        </option>
+
+        `;
+
+    });
+
+    cmb.onchange=pilihEvent;
+
+}
+
+/*====================================
+LOAD PESERTA
+====================================*/
+
+async function loadPeserta(){
+
+    const {data,error}=await db
+
+    .from("participants")
+
+    .select("*")
+
+    .order("nama");
+
+    if(error){
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    semuaPeserta=data||[];
+
+    renderPeserta();
+
+}
+
+/*====================================
+RENDER PESERTA
+====================================*/
+
+function renderPeserta(){
+
+    const list=document.getElementById("listPeserta");
+
+    list.innerHTML="";
+
+    semuaPeserta.forEach(p=>{
+
+        list.innerHTML+=`
+
+        <div class="item">
+
+            <input
+
+            type="checkbox"
+
+            class="chkPeserta"
+
+            value="${p.id}"
+
+            ${p.event_id ? "checked":""}
+
+            >
+
+            <div>
+
+                <b>${p.nama}</b>
+
+                <br>
+
+                ${p.email}
+
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+    document.getElementById("totalPeserta").innerHTML=
+
+    semuaPeserta.length;
+
+    hitungDipilih();
+
+}
+
+/*====================================
+FILTER
+====================================*/
+
+function filterPeserta(){
+
+    const cari=document.getElementById("txtCari")
+
+    .value.toLowerCase();
+
+    const item=document.querySelectorAll(".item");
+
+    item.forEach(i=>{
+
+        if(i.innerText.toLowerCase().includes(cari))
+
+            i.style.display="flex";
+
+        else
+
+            i.style.display="none";
+
+    });
+
+}
+
+/*====================================
+HITUNG YANG DIPILIH
+====================================*/
+
+function hitungDipilih(){
+
+    document.getElementById("dipilih").innerHTML=
+
+    document.querySelectorAll(".chkPeserta:checked").length;
+
+}
+
+document.addEventListener("change",(e)=>{
+
+    if(e.target.classList.contains("chkPeserta"))
+
+        hitungDipilih();
+
+});
+
+/*====================================
+PILIH EVENT
+====================================*/
+
+async function pilihEvent(){
+
+    const eventId=this.value;
+
+    if(eventId==""){
+
+        document.getElementById("totalTahapan").innerHTML="0";
+
+        return;
+
+    }
+
+    const {data,error}=await db
+
+    .from("event_tests")
+
+    .select("*")
+
+    .eq("event_id",eventId);
+
+    if(error){
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    semuaTahapan=data||[];
+
+    document.getElementById("totalTahapan").innerHTML=
+
+    semuaTahapan.length;
+
+}
+
+<!-- ====================================
+SIMPAN PESERTA KE EVENT
+==================================== -->
+
+<script>
+
+async function simpanPeserta(){
+
+    const eventId=document.getElementById("eventSelect").value;
+
+    if(eventId==""){
+
+        alert("Pilih Event terlebih dahulu.");
+
+        return;
+
+    }
+
+    const pesertaDipilih=[
+        ...document.querySelectorAll(".chkPeserta:checked")
+    ].map(x=>x.value);
+
+    if(pesertaDipilih.length==0){
+
+        alert("Belum ada peserta yang dipilih.");
+
+        return;
+
+    }
+
+    const log=document.getElementById("progressBox");
+
+    log.innerHTML="Memulai proses...\n";
+
+    /*====================================
+    UPDATE EVENT PESERTA
+    ====================================*/
+
+    for(const pesertaId of pesertaDipilih){
+
+        log.innerHTML+="Assign peserta "+pesertaId+" ...<br>";
+
+        const {error:updateError}=await db
+
+        .from("participants")
+
+        .update({
+
+            event_id:eventId
+
+        })
+
+        .eq("id",pesertaId);
+
+        if(updateError){
+
+            log.innerHTML+="❌ "+updateError.message+"<br>";
+
+            continue;
+
+        }
+
+    }
+
+    log.innerHTML+="<br>✔ Event peserta berhasil disimpan.<br><br>";
+
+    /*====================================
+    AMBIL TAHAPAN EVENT
+    ====================================*/
+
+    const {data:tahapan,error:tError}=await db
+
+    .from("event_tests")
+
+    .select("*")
+
+    .eq("event_id",eventId)
+
+    .order("urutan");
+
+    if(tError){
+
+        alert(tError.message);
+
+        return;
+
+    }
+
+    let insertBerhasil=0;
+
+    let skip=0;
+
+    /*====================================
+    GENERATE PROGRESS
+    ====================================*/
+
+    for(const pesertaId of pesertaDipilih){
+
+        for(const t of tahapan){
+
+            const cek=await db
+
+            .from("progress")
+
+            .select("id")
+
+            .eq("participant_id",pesertaId)
+
+            .eq("event_id",eventId)
+
+            .eq("test_id",t.test_id);
+
+            if(cek.data.length>0){
+
+                skip++;
+
+                continue;
+
+            }
+
+            const simpan=await db
+
+            .from("progress")
+
+            .insert({
+
+                participant_id:pesertaId,
+
+                event_id:eventId,
+
+                test_id:t.test_id,
+
+                status:"BELUM",
+
+                download_count:0,
+
+                upload_count:0
+
+            });
+
+            if(simpan.error){
+
+                log.innerHTML+="❌ "+simpan.error.message+"<br>";
+
+            }else{
+
+                insertBerhasil++;
+
+            }
+
+        }
+
+    }
+
+    log.innerHTML+="<hr>";
+
+    log.innerHTML+="✔ Progress dibuat : "+insertBerhasil+" record<br>";
+
+    log.innerHTML+="✔ Sudah ada : "+skip+" record<br>";
+
+    log.innerHTML+="<br>";
+
+    log.innerHTML+="SELESAI";
+
+    alert("Generate Progress selesai.");
+
+}
+
+</script>
+
+</script>
+
+</script>
+
+</body>
+</html>
