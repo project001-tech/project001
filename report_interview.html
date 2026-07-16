@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Report Interview AMT JBB</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,Arial,sans-serif;
+}
+
+body{
+
+background:#f3f5f7;
+padding:30px;
+
+}
+
+.container{
+
+max-width:850px;
+margin:auto;
+background:white;
+border-radius:12px;
+padding:30px;
+box-shadow:0 5px 18px rgba(0,0,0,.12);
+
+}
+
+h1{
+
+text-align:center;
+color:#1c3d5a;
+margin-bottom:30px;
+
+}
+
+.form-group{
+
+margin-bottom:18px;
+
+}
+
+label{
+
+display:block;
+margin-bottom:8px;
+font-weight:600;
+
+}
+
+select,
+input,
+textarea{
+
+width:100%;
+padding:12px;
+border:1px solid #cfd8dc;
+border-radius:8px;
+font-size:15px;
+
+}
+
+select:focus,
+input:focus,
+textarea:focus{
+
+outline:none;
+border:1px solid #1565c0;
+
+}
+
+textarea{
+
+resize:vertical;
+min-height:120px;
+
+}
+
+.info{
+
+background:#f5f5f5;
+padding:12px;
+border-radius:8px;
+margin-bottom:18px;
+display:grid;
+grid-template-columns:150px auto;
+row-gap:10px;
+
+}
+
+.info span:first-child{
+
+font-weight:bold;
+
+}
+
+.radio-group{
+
+display:flex;
+gap:30px;
+margin-top:8px;
+
+}
+
+.radio-group label{
+
+font-weight:normal;
+
+}
+
+button{
+
+width:100%;
+padding:15px;
+border:none;
+border-radius:8px;
+background:#1565c0;
+color:white;
+font-size:16px;
+cursor:pointer;
+font-weight:bold;
+
+}
+
+button:hover{
+
+background:#0d47a1;
+
+}
+
+.success{
+
+display:none;
+margin-top:20px;
+padding:15px;
+background:#e8f5e9;
+border:1px solid #4caf50;
+color:#2e7d32;
+border-radius:8px;
+text-align:center;
+font-weight:bold;
+
+}
+
+@media(max-width:700px){
+
+.container{
+
+padding:20px;
+
+}
+
+.info{
+
+grid-template-columns:1fr;
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>REPORT INTERVIEW AMT JBB</h1>
+
+
+<div class="form-group">
+
+<label>Nama Kandidat *</label>
+
+<select id="kandidat">
+
+<option value="">-- Pilih Kandidat --</option>
+
+</select>
+
+</div>
+
+
+
+<div class="info">
+
+<span>Usia</span>
+
+<span id="usia">-</span>
+
+<span>Domisili</span>
+
+<span id="domisili">-</span>
+
+</div>
+
+
+
+<div class="form-group">
+
+<label>Tanggal Interview</label>
+
+<input type="date" id="tanggal">
+
+</div>
+
+
+
+<div class="form-group">
+
+<label>Interviewer *</label>
+
+<select id="interviewer">
+
+<option value="">-- Pilih Interviewer --</option>
+
+</select>
+
+</div>
+
+
+
+<div class="form-group">
+
+<label>Kehadiran</label>
+
+<div class="radio-group">
+
+<label>
+
+<input
+type="radio"
+name="hadir"
+value="Hadir"
+checked>
+
+Hadir
+
+</label>
+
+<label>
+
+<input
+type="radio"
+name="hadir"
+value="Tidak Hadir">
+
+Tidak Hadir
+
+</label>
+
+</div>
+
+</div>
+
+
+
+<div class="form-group">
+
+<label>Hasil Rekrutmen</label>
+
+<select id="hasil">
+
+<option value="">-- Pilih Hasil --</option>
+
+<option>Lolos</option>
+
+<option>Dipertimbangkan</option>
+
+<option>Cadangan</option>
+
+<option>Tidak Lolos</option>
+
+<option>Menunggu Keputusan</option>
+
+</select>
+
+</div>
+
+
+
+<div class="form-group">
+
+<label>Catatan</label>
+
+<textarea
+id="note"
+placeholder="Masukkan catatan hasil interview..."></textarea>
+
+</div>
+
+
+
+<button id="btnSimpan">
+
+💾 SIMPAN DATA
+
+</button>
+
+
+
+<div
+class="success"
+id="success">
+
+<div class="success" id="success">
+    ✅ Data berhasil disimpan
+</div>
+
+
+<script>
+
+//====================================================
+// KONFIGURASI SUPABASE
+//====================================================
+
+const SUPABASE_URL = "https://xxxxxxxxxxxxxxxx.supabase.co";
+const SUPABASE_KEY = "PASTE_ANON_KEY_ANDA";
+
+const db = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+//====================================================
+// KOMPONEN
+//====================================================
+
+const kandidat = document.getElementById("kandidat");
+const interviewer = document.getElementById("interviewer");
+
+const usia = document.getElementById("usia");
+const domisili = document.getElementById("domisili");
+
+const tanggal = document.getElementById("tanggal");
+
+let kandidatList=[];
+
+
+//====================================================
+// TANGGAL HARI INI
+//====================================================
+
+tanggal.value = new Date().toISOString().split("T")[0];
+
+
+//====================================================
+// LOAD KANDIDAT
+//====================================================
+
+async function loadKandidat(){
+
+const {data,error}=await db
+.from("master_kandidat")
+.select("*")
+.order("nama");
+
+if(error){
+
+alert(error.message);
+return;
+
+}
+
+kandidatList=data;
+
+kandidat.innerHTML="<option value=''>-- Pilih Kandidat --</option>";
+
+data.forEach(item=>{
+
+kandidat.innerHTML+=`
+<option value="${item.id}">
+${item.nama}
+</option>
+`;
+
+});
+
+}
+
+loadKandidat();
+
+
+//====================================================
+// LOAD INTERVIEWER
+//====================================================
+
+async function loadInterviewer(){
+
+const {data,error}=await db
+.from("master_interviewer")
+.select("*")
+.order("nama");
+
+if(error){
+
+alert(error.message);
+return;
+
+}
+
+interviewer.innerHTML="<option value=''>-- Pilih Interviewer --</option>";
+
+data.forEach(item=>{
+
+interviewer.innerHTML+=`
+<option value="${item.id}">
+${item.nama}
+</option>
+`;
+
+});
+
+}
+
+loadInterviewer();
+
+
+//====================================================
+// TAMPILKAN DATA KANDIDAT
+//====================================================
+
+kandidat.addEventListener("change",()=>{
+
+const id=Number(kandidat.value);
+
+const data=kandidatList.find(x=>x.id===id);
+
+if(!data){
+
+usia.innerHTML="-";
+domisili.innerHTML="-";
+return;
+
+}
+
+usia.innerHTML=data.usia ?? "-";
+
+domisili.innerHTML=data.domisili ?? "-";
+
+});
+
+
+//====================================================
+// SIMPAN DATA
+//====================================================
+
+document.getElementById("btnSimpan").addEventListener("click", simpanData);
+
+async function simpanData(){
+
+    const kandidat_id = kandidat.value;
+    const interviewer_id = interviewer.value;
+    const tanggal_interview = tanggal.value;
+    const kehadiran = document.querySelector("input[name='hadir']:checked").value;
+    const hasil_rekrutmen = document.getElementById("hasil").value;
+    const note = document.getElementById("note").value.trim();
+
+    // VALIDASI
+    if(kandidat_id==""){
+        alert("Silakan pilih Kandidat.");
+        kandidat.focus();
+        return;
+    }
+
+  const sudahAda = await cekInterviewHariIni(
+    Number(kandidat_id),
+    tanggal_interview
+);
+
+if(sudahAda){
+
+    if(!confirm("Kandidat ini sudah memiliki report interview pada tanggal tersebut.\n\nTetap simpan?")){
+        return;
+    }
+
+}
+
+    if(interviewer_id==""){
+        alert("Silakan pilih Interviewer.");
+        interviewer.focus();
+        return;
+    }
+
+    if(hasil_rekrutmen==""){
+        alert("Silakan pilih Hasil Rekrutmen.");
+        document.getElementById("hasil").focus();
+        return;
+    }
+
+    // NONAKTIFKAN TOMBOL
+    const btn=document.getElementById("btnSimpan");
+    btn.disabled=true;
+    btn.innerHTML="Menyimpan...";
+
+    // INSERT KE SUPABASE
+    const {error}=await db
+    .from("report_interview")
+    .insert([{
+
+        kandidat_id:Number(kandidat_id),
+
+        interviewer_id:Number(interviewer_id),
+
+        tanggal_interview:tanggal_interview,
+
+        kehadiran:kehadiran,
+
+        hasil_rekrutmen:hasil_rekrutmen,
+
+        note:note
+
+    }]);
+
+    if(error){
+
+        alert("Gagal menyimpan.\n\n"+error.message);
+
+        btn.disabled=false;
+        btn.innerHTML="💾 SIMPAN DATA";
+
+        return;
+
+    }
+
+    // NOTIFIKASI
+    const success=document.getElementById("success");
+
+    success.style.display="block";
+
+    // RESET FORM
+    kandidat.value="";
+    usia.innerHTML="-";
+    domisili.innerHTML="-";
+
+    // interviewer sengaja tidak direset
+
+    document.querySelector("input[value='Hadir']").checked=true;
+
+    document.getElementById("hasil").value="";
+
+    document.getElementById("note").value="";
+
+    tanggal.value=new Date().toISOString().split("T")[0];
+
+    btn.disabled=false;
+    btn.innerHTML="💾 SIMPAN DATA";
+
+    kandidat.focus();
+
+    setTimeout(()=>{
+
+        success.style.display="none";
+
+    },2500);
+
+}
+
+<!-- =======================================
+     PART 4 - FINISHING
+======================================= -->
+
+<script>
+
+//==========================================
+// CEK DOUBLE INPUT
+//==========================================
+
+async function cekInterviewHariIni(kandidat_id,tanggal_interview){
+
+    const {data,error}=await db
+    .from("report_interview")
+    .select("id")
+    .eq("kandidat_id",kandidat_id)
+    .eq("tanggal_interview",tanggal_interview)
+    .limit(1);
+
+    if(error) return false;
+
+    return data.length>0;
+
+}
+
+//==========================================
+// ENTER PINDAH FIELD
+//==========================================
+
+document.querySelectorAll("select,input,textarea").forEach((el,index,arr)=>{
+
+    el.addEventListener("keydown",function(e){
+
+        if(e.key==="Enter"){
+
+            e.preventDefault();
+
+            if(arr[index+1]){
+
+                arr[index+1].focus();
+
+            }
+
+        }
+
+    });
+
+});
+
+
+//==========================================
+// LOADING
+//==========================================
+
+window.onload=()=>{
+
+    document.body.style.opacity=0;
+
+    setTimeout(()=>{
+
+        document.body.style.transition=".25s";
+
+        document.body.style.opacity=1;
+
+    },100);
+
+}
+
+
+//==========================================
+// FOOTER
+//==========================================
+
+const footer=document.createElement("div");
+
+footer.style.marginTop="35px";
+footer.style.textAlign="center";
+footer.style.color="#777";
+footer.style.fontSize="13px";
+
+footer.innerHTML="Copyright © J S Nur Laili";
+
+document.querySelector(".container").appendChild(footer);
+
+</script>
+
+</body>
+</html>
+
+</script>
+
+✅ Data berhasil disimpan
+
+</div>
